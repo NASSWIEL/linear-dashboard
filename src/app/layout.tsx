@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Suivi IA — AT · CGI",
+  title: "Suivi Projets : BT-IA · CGI",
   description: "Suivi des projets IA — CGI, Unité AT.",
 };
 

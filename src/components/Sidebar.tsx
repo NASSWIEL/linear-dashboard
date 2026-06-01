@@ -34,7 +34,7 @@ export function Sidebar({
           />
         </span>
         <div className="leading-tight">
-          <p className="text-sm font-semibold text-fg">Suivi IA — AT</p>
+          <p className="text-sm font-semibold text-fg">Suivi Projets : BT-IA</p>
           <p className="text-[11px] text-muted">CGI · Unité AT</p>
         </div>
       </div>
