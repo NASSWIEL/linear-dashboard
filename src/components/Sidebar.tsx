@@ -41,14 +41,14 @@ export function Sidebar({
 
       <nav className="flex-1 overflow-y-auto px-3 py-2">
         <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
-          Projects
+          Projets
         </p>
 
         <ProjectItem
           active={selectedId === "all"}
           onClick={() => onSelect("all")}
           dotColor="#a1a1aa"
-          label="All projects"
+          label="Tous les projets"
           count={totalCount}
         />
 
@@ -64,18 +64,18 @@ export function Sidebar({
         ))}
 
         {projects.length === 0 && (
-          <p className="px-2 py-2 text-xs text-faint">No projects found.</p>
+          <p className="px-2 py-2 text-xs text-faint">Aucun projet trouvé.</p>
         )}
 
         <p className="px-2 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-faint">
-          People
+          Personnes
         </p>
 
         <PersonItem
           active={selectedAssignee === "all"}
           onClick={() => onSelectAssignee("all")}
           variant="everyone"
-          label="Everyone"
+          label="Tout le monde"
           count={countByAssignee("all")}
         />
 
@@ -95,7 +95,7 @@ export function Sidebar({
           active={selectedAssignee === "unassigned"}
           onClick={() => onSelectAssignee("unassigned")}
           variant="unassigned"
-          label="Unassigned"
+          label="Non assigné"
           count={countByAssignee("unassigned")}
         />
       </nav>
@@ -106,7 +106,7 @@ export function Sidebar({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          Live · auto-refreshing
+          En direct · actualisation auto
         </div>
       </div>
     </aside>
@@ -168,7 +168,7 @@ function PersonItem({
   return (
     <button
       type="button"
-      aria-label={`Filter by ${label}`}
+      aria-label={`Filtrer par ${label}`}
       onClick={onClick}
       className={`mt-0.5 flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
         active

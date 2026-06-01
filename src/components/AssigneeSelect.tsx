@@ -11,7 +11,7 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
   return (
     <select
       aria-label={`Assignee of ${issue.identifier}`}
-      title="Reassign"
+      title="Réassigner"
       disabled={busy}
       value={issue.assignee?.id ?? ""}
       onChange={(e) =>
@@ -19,7 +19,7 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
       }
       className="max-w-[8rem] cursor-pointer rounded-md border border-border bg-elevated px-1.5 py-1 text-[11px] text-fg outline-none hover:border-border focus:border-sky-500 disabled:opacity-50"
     >
-      <option value="">Unassigned</option>
+      <option value="">Non assigné</option>
       {/* If the current assignee isn't in the member list (e.g. the bot), keep it visible. */}
       {issue.assignee && !users.some((u) => u.id === issue.assignee?.id) && (
         <option value={issue.assignee.id}>{issue.assignee.displayName}</option>

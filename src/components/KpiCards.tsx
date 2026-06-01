@@ -22,9 +22,9 @@ export function KpiCards({
 }) {
   const kpis: Kpi[] = [
     {
-      label: "Total issues",
+      label: "Total",
       value: metrics.total,
-      hint: "all statuses",
+      hint: "tous les statuts",
       accent: "text-fg",
       ring: "ring-border/40",
       filter: "all",
@@ -32,39 +32,39 @@ export function KpiCards({
     {
       label: "Backlog",
       value: metrics.backlog,
-      hint: "not started",
+      hint: "non démarré",
       accent: "text-muted",
       ring: "ring-border/40",
       filter: "backlog",
     },
     {
-      label: "Todo",
+      label: "À faire",
       value: metrics.todo,
-      hint: "ready to start",
+      hint: "prêt à démarrer",
       accent: "text-indigo-700 dark:text-indigo-300",
       ring: "ring-indigo-500/30",
       filter: "todo",
     },
     {
-      label: "In progress",
+      label: "En cours",
       value: metrics.inProgress,
-      hint: "actively being worked",
+      hint: "en cours de traitement",
       accent: "text-sky-700 dark:text-sky-300",
       ring: "ring-sky-500/30",
       filter: "in-progress",
     },
     {
-      label: "Overdue",
+      label: "En retard",
       value: metrics.overdueCount,
-      hint: metrics.overdueCount > 0 ? "needs attention" : "all on track",
+      hint: metrics.overdueCount > 0 ? "à traiter" : "tout est à jour",
       accent: metrics.overdueCount > 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400",
       ring: metrics.overdueCount > 0 ? "ring-red-500/30" : "ring-emerald-500/30",
       filter: "overdue",
     },
     {
-      label: "Done",
+      label: "Terminé",
       value: metrics.completed,
-      hint: `${metrics.completionRate}% completion`,
+      hint: `${metrics.completionRate}% complété`,
       accent: "text-emerald-700 dark:text-emerald-300",
       ring: "ring-emerald-500/30",
       filter: "done",
@@ -96,7 +96,7 @@ export function KpiCards({
             {kpi.hint && <p className="mt-1 text-xs text-muted">{kpi.hint}</p>}
             {active && (
               <p className="mt-1 text-[10px] font-medium text-sky-700 dark:text-sky-400">
-                Filtering · click to clear
+                Filtré · cliquer pour effacer
               </p>
             )}
           </button>

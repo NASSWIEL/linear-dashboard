@@ -9,7 +9,7 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
   return (
     <div className="rounded-xl border border-border bg-surface/60">
       <header className="flex items-center justify-between border-b border-border px-4 py-3">
-        <h2 className="text-sm font-semibold text-fg">Overdue</h2>
+        <h2 className="text-sm font-semibold text-fg">En retard</h2>
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-medium ${
             sorted.length > 0
@@ -23,7 +23,7 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
 
       {sorted.length === 0 ? (
         <p className="px-4 py-6 text-center text-sm text-muted">
-          Nothing overdue. 🎉
+          Aucun retard. 🎉
         </p>
       ) : (
         <ul className="divide-y divide-border">

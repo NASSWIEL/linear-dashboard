@@ -6,9 +6,9 @@ export function PriorityBreakdown({ buckets }: { buckets: PriorityBucket[] }) {
 
   return (
     <div className="rounded-xl border border-border bg-surface/60 p-4">
-      <h2 className="text-sm font-semibold text-fg">By priority</h2>
+      <h2 className="text-sm font-semibold text-fg">Par priorité</h2>
       {buckets.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted">No data</p>
+        <p className="py-6 text-center text-sm text-muted">Aucune donnée</p>
       ) : (
         <ul className="mt-3 space-y-2.5">
           {buckets.map((bucket) => {

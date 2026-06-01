@@ -10,11 +10,11 @@ import type {
 } from "@/lib/types";
 
 const PRIORITIES = [
-  { value: 0, label: "No priority" },
+  { value: 0, label: "Aucune priorité" },
   { value: 1, label: "Urgent" },
-  { value: 2, label: "High" },
-  { value: 3, label: "Medium" },
-  { value: 4, label: "Low" },
+  { value: 2, label: "Haute" },
+  { value: 3, label: "Moyenne" },
+  { value: 4, label: "Basse" },
 ];
 
 export function IssueModal({
@@ -57,7 +57,7 @@ export function IssueModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim()) {
-      setError("Title is required");
+      setError("Le titre est obligatoire");
       return;
     }
     setSubmitting(true);
@@ -85,7 +85,7 @@ export function IssueModal({
       }
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Une erreur est survenue");
       setSubmitting(false);
     }
   }
@@ -101,7 +101,7 @@ export function IssueModal({
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-fg">
-            {mode === "create" ? "New issue" : `Edit ${issue?.identifier}`}
+            {mode === "create" ? "Nouvelle tâche" : `Modifier ${issue?.identifier}`}
           </h2>
           <button
             type="button"
@@ -114,12 +114,12 @@ export function IssueModal({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs text-muted">Title</label>
+            <label className="mb-1 block text-xs text-muted">Titre</label>
             <input
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Issue title"
+              placeholder="Titre de la tâche"
               className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
             />
           </div>
@@ -132,19 +132,19 @@ export function IssueModal({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Add a description…"
+              placeholder="Ajouter une description…"
               className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Project">
+            <Field label="Projet">
               <select
                 value={projectId}
                 onChange={(e) => setProjectId(e.target.value)}
                 className={selectCls}
               >
-                <option value="">No project</option>
+                <option value="">Aucun projet</option>
                 {projects.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
@@ -153,13 +153,13 @@ export function IssueModal({
               </select>
             </Field>
 
-            <Field label="Status">
+            <Field label="Statut">
               <select
                 value={stateId}
                 onChange={(e) => setStateId(e.target.value)}
                 className={selectCls}
               >
-                <option value="">Default</option>
+                <option value="">Par défaut</option>
                 {states.map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
@@ -168,13 +168,13 @@ export function IssueModal({
               </select>
             </Field>
 
-            <Field label="Assignee">
+            <Field label="Assigné à">
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 className={selectCls}
               >
-                <option value="">Unassigned</option>
+                <option value="">Non assigné</option>
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.displayName}
@@ -183,7 +183,7 @@ export function IssueModal({
               </select>
             </Field>
 
-            <Field label="Priority">
+            <Field label="Priorité">
               <select
                 value={priority}
                 onChange={(e) => setPriority(Number(e.target.value))}
@@ -197,7 +197,7 @@ export function IssueModal({
               </select>
             </Field>
 
-            <Field label="Due date">
+            <Field label="Échéance">
               <input
                 type="date"
                 value={dueDate ?? ""}
@@ -219,7 +219,7 @@ export function IssueModal({
               onClick={onClose}
               className="rounded-lg border border-border px-3 py-2 text-sm text-muted hover:bg-surface"
             >
-              Cancel
+              Annuler
             </button>
             <button
               type="submit"
@@ -227,10 +227,10 @@ export function IssueModal({
               className="rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-60"
             >
               {submitting
-                ? "Saving…"
+                ? "Enregistrement…"
                 : mode === "create"
-                  ? "Create issue"
-                  : "Save changes"}
+                  ? "Créer la tâche"
+                  : "Enregistrer"}
             </button>
           </div>
         </form>

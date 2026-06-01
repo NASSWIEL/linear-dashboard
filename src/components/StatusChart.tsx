@@ -14,10 +14,10 @@ export function StatusChart({
 
   return (
     <div className="rounded-xl border border-border bg-surface/60 p-4">
-      <h2 className="text-sm font-semibold text-fg">Status breakdown</h2>
+      <h2 className="text-sm font-semibold text-fg">Répartition des statuts</h2>
 
       {data.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted">No data</p>
+        <p className="py-10 text-center text-sm text-muted">Aucune donnée</p>
       ) : (
         <div className="mt-2 flex items-center gap-4">
           <div className="relative h-36 w-36 shrink-0">
@@ -53,7 +53,7 @@ export function StatusChart({
                 {total}
               </span>
               <span className="text-[10px] uppercase tracking-wide text-muted">
-                issues
+                tâches
               </span>
             </div>
           </div>

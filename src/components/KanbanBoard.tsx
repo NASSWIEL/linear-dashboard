@@ -11,7 +11,7 @@ export function KanbanBoard({
   if (columns.length === 0) {
     return (
       <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
-        No issues to display for this selection.
+        Aucune tâche à afficher pour cette sélection.
       </div>
     );
   }

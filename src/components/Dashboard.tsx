@@ -31,13 +31,13 @@ import { MembersModal } from "./MembersModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 const FILTER_LABELS: Record<MetricFilter, string> = {
-  all: "All",
-  overdue: "Overdue",
-  "in-progress": "In progress",
-  done: "Done",
-  todo: "Todo",
+  all: "Tout",
+  overdue: "En retard",
+  "in-progress": "En cours",
+  done: "Terminé",
+  todo: "À faire",
   backlog: "Backlog",
-  unassigned: "Unassigned",
+  unassigned: "Non assigné",
 };
 
 async function fetcher<T>(url: string): Promise<T> {
@@ -125,13 +125,13 @@ export function Dashboard() {
     assignee === "all"
       ? null
       : assignee === "unassigned"
-        ? "Unassigned"
-        : (members.find((m) => m.id === assignee)?.displayName ?? "Member");
+        ? "Non assigné"
+        : (members.find((m) => m.id === assignee)?.displayName ?? "Membre");
 
   const selectedProjectName =
     selectedId === "all"
-      ? "All projects"
-      : (projects.find((p) => p.id === selectedId)?.name ?? "Project");
+      ? "Tous les projets"
+      : (projects.find((p) => p.id === selectedId)?.name ?? "Projet");
 
   function setParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -254,8 +254,8 @@ export function Dashboard() {
               </div>
               <p className="text-xs text-muted">
                 {issuesData
-                  ? `Updated ${relativeTime(new Date(issuesData.fetchedAt).toISOString())}`
-                  : "Loading…"}
+                  ? `Mis à jour ${relativeTime(new Date(issuesData.fetchedAt).toISOString())}`
+                  : "Chargement…"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -274,7 +274,7 @@ export function Dashboard() {
                 onClick={() => setModal({ mode: "create" })}
                 className="rounded-lg bg-sky-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-500"
               >
-                + New issue
+                + Nouvelle tâche
               </button>
               <button
                 type="button"
@@ -286,7 +286,7 @@ export function Dashboard() {
                     isValidating ? "animate-pulse bg-sky-400" : "bg-faint"
                   }`}
                 />
-                Refresh
+                Actualiser
               </button>
             </div>
           </header>
@@ -321,7 +321,7 @@ export function Dashboard() {
                   <div className="min-w-0">
                     <div className="mb-3 flex items-center gap-2">
                       <h2 className="text-sm font-semibold text-muted">
-                        Board
+                        Tableau
                       </h2>
                       {filter !== "all" && (
                         <button
@@ -399,20 +399,20 @@ function ErrorState({
   return (
     <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-6">
       <h2 className="text-sm font-semibold text-red-700 dark:text-red-300">
-        Couldn’t load Linear data
+        Impossible de charger les données Linear
       </h2>
       <p className="mt-1 max-w-2xl text-sm text-red-700 dark:text-red-200/80">{message}</p>
       <p className="mt-2 text-xs text-red-700 dark:text-red-200/60">
-        Check that <code className="font-mono">LINEAR_API_KEY</code> is set in{" "}
-        <code className="font-mono">.env.local</code> (Linear → Settings → API →
-        Personal API keys).
+        Vérifiez que <code className="font-mono">LINEAR_API_KEY</code> est défini dans{" "}
+        <code className="font-mono">.env.local</code> (Linear → Paramètres → API →
+        Clés API personnelles).
       </p>
       <button
         type="button"
         onClick={onRetry}
         className="mt-4 rounded-lg border border-red-800 bg-red-900/40 px-3 py-1.5 text-xs font-medium text-red-100 hover:bg-red-900/60"
       >
-        Retry
+        Réessayer
       </button>
     </div>
   );

@@ -10,31 +10,31 @@ export function priorityStyle(label: string): PriorityStyle {
   switch (label) {
     case "Urgent":
       return {
-        label,
+        label: "Urgent",
         dot: "bg-red-500",
         badge: "bg-red-500/10 text-red-700 dark:text-red-300 ring-1 ring-red-500/30",
       };
     case "High":
       return {
-        label,
+        label: "Haute",
         dot: "bg-orange-500",
         badge: "bg-orange-500/10 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/30",
       };
     case "Medium":
       return {
-        label,
+        label: "Moyenne",
         dot: "bg-amber-400",
         badge: "bg-amber-400/10 text-amber-700 dark:text-amber-200 ring-1 ring-amber-400/30",
       };
     case "Low":
       return {
-        label,
+        label: "Basse",
         dot: "bg-sky-500",
         badge: "bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30",
       };
     default:
       return {
-        label: "No priority",
+        label: "Aucune priorité",
         dot: "bg-faint",
         badge: "bg-zinc-500/10 text-muted ring-1 ring-zinc-500/20",
       };
@@ -65,11 +65,11 @@ export function dueInfo(dueDate: string | null): {
   const daysDiff = Math.round((dueMs - todayMs) / 86_400_000);
 
   let text: string;
-  if (daysDiff === 0) text = "Due today";
-  else if (daysDiff === 1) text = "Due tomorrow";
-  else if (daysDiff === -1) text = "1 day overdue";
-  else if (daysDiff < 0) text = `${Math.abs(daysDiff)} days overdue`;
-  else text = `Due in ${daysDiff} days`;
+  if (daysDiff === 0) text = "Échéance aujourd'hui";
+  else if (daysDiff === 1) text = "Échéance demain";
+  else if (daysDiff === -1) text = "1 jour de retard";
+  else if (daysDiff < 0) text = `${Math.abs(daysDiff)} jours de retard`;
+  else text = `Dans ${daysDiff} jour${daysDiff > 1 ? "s" : ""}`;
 
   return { text, daysDiff };
 }
@@ -77,14 +77,14 @@ export function dueInfo(dueDate: string | null): {
 export function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
   const seconds = Math.round((Date.now() - then) / 1000);
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return "à l'instant";
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return `il y a ${minutes} min`;
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return `il y a ${hours} h`;
   const days = Math.round(hours / 24);
-  if (days < 30) return `${days}d ago`;
+  if (days < 30) return `il y a ${days} j`;
   const months = Math.round(days / 30);
-  if (months < 12) return `${months}mo ago`;
-  return `${Math.round(months / 12)}y ago`;
+  if (months < 12) return `il y a ${months} mois`;
+  return `il y a ${Math.round(months / 12)} an${Math.round(months / 12) > 1 ? "s" : ""}`;
 }

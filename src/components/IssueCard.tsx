@@ -88,50 +88,50 @@ export function IssueCard({ issue }: { issue: Issue }) {
         >
           {isDone
             ? issue.state.type === "completed"
-              ? "Completed"
-              : "Canceled"
+              ? "Terminé"
+              : "Annulé"
             : due
               ? due.text
-              : "No due date"}
+              : "Sans échéance"}
         </span>
 
         {confirmArchive ? (
           <span className="flex items-center gap-1.5 text-[11px]">
-            <span className="text-muted">Archive?</span>
+            <span className="text-muted">Archiver ?</span>
             <button
               type="button"
               disabled={busy}
-              aria-label={`Confirm archive ${issue.identifier}`}
+              aria-label={`Confirmer l'archivage de ${issue.identifier}`}
               onClick={() => archiveIssue(issue.id)}
               className="rounded bg-red-600/80 px-1.5 py-0.5 font-medium text-white hover:bg-red-600"
             >
-              Yes
+              Oui
             </button>
             <button
               type="button"
               onClick={() => setConfirmArchive(false)}
               className="rounded bg-elevated px-1.5 py-0.5 text-fg hover:bg-faint"
             >
-              No
+              Non
             </button>
           </span>
         ) : (
           <span className="flex items-center gap-2 text-[11px]">
             <button
               type="button"
-              aria-label={`Edit ${issue.identifier}`}
+              aria-label={`Modifier ${issue.identifier}`}
               onClick={() => editIssue(issue.id)}
               className="text-muted hover:text-sky-300"
             >
-              Edit
+              Modifier
             </button>
             <button
               type="button"
-              aria-label={`Archive ${issue.identifier}`}
+              aria-label={`Archiver ${issue.identifier}`}
               onClick={() => setConfirmArchive(true)}
               className="text-muted hover:text-red-400"
             >
-              Archive
+              Archiver
             </button>
           </span>
         )}

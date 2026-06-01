@@ -12,7 +12,7 @@ export function StatusSelect({ issue }: { issue: Issue }) {
   const current = states.find((s) => s.name === issue.state.name);
 
   return (
-    <label className="inline-flex items-center gap-1.5" title="Change status">
+    <label className="inline-flex items-center gap-1.5" title="Changer le statut">
       <span
         className="h-2 w-2 shrink-0 rounded-full"
         style={{ backgroundColor: issue.state.color }}
