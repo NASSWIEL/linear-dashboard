@@ -25,8 +25,13 @@ export function Sidebar({
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white">
-          AT
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white p-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/assets/lg_cgi_color.png"
+            alt="CGI"
+            className="h-full w-full object-contain"
+          />
         </span>
         <div className="leading-tight">
           <p className="text-sm font-semibold text-zinc-100">Suivi IA — AT</p>
