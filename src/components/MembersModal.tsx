@@ -12,6 +12,14 @@ async function fetcher(url: string) {
   return json as { members: User[]; leadId: string | null };
 }
 
+type Role = "member" | "guest" | "admin";
+
+const ROLE_LABELS: Record<Role, string> = {
+  member: "Membre",
+  guest: "Invité",
+  admin: "Admin",
+};
+
 export function MembersModal({
   projectId,
   projectName,
@@ -29,9 +37,17 @@ export function MembersModal({
   );
   const members = data?.members ?? [];
   const leadId = data?.leadId ?? null;
+
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Add to project
   const [toAdd, setToAdd] = useState("");
+
+  // Invite to workspace
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<Role>("member");
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const addable = workspaceUsers.filter(
     (u) => !members.some((m) => m.id === u.id),
@@ -48,11 +64,11 @@ export function MembersModal({
         body: JSON.stringify({ userId: toAdd }),
       });
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Add failed");
+      if (!res.ok) throw new Error(json?.error || "Échec de l'ajout");
       setToAdd("");
       await mutate();
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "Add failed");
+      setActionError(e instanceof Error ? e.message : "Échec de l'ajout");
     } finally {
       setBusy(false);
     }
@@ -67,10 +83,32 @@ export function MembersModal({
         { method: "DELETE" },
       );
       const json = await res.json();
-      if (!res.ok) throw new Error(json?.error || "Remove failed");
+      if (!res.ok) throw new Error(json?.error || "Échec de la suppression");
       await mutate();
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "Remove failed");
+      setActionError(e instanceof Error ? e.message : "Échec de la suppression");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function inviteMember() {
+    if (!inviteEmail.trim()) return;
+    setBusy(true);
+    setActionError(null);
+    setInviteSuccess(null);
+    try {
+      const res = await fetch("/api/workspace/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Échec de l'invitation");
+      setInviteSuccess(inviteEmail.trim());
+      setInviteEmail("");
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Échec de l'invitation");
     } finally {
       setBusy(false);
     }
@@ -97,34 +135,84 @@ export function MembersModal({
         </div>
         <p className="mb-4 truncate text-xs text-muted">{projectName}</p>
 
-        {/* Add member */}
-        <div className="mb-4 flex gap-2">
+        {/* ── Section 1 : Inviter au workspace ── */}
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
+          Inviter au workspace
+        </p>
+        <div className="mb-1 flex gap-2">
+          <input
+            type="email"
+            value={inviteEmail}
+            onChange={(e) => setInviteEmail(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && inviteMember()}
+            placeholder="email@exemple.com"
+            disabled={busy}
+            className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-fg outline-none placeholder:text-faint focus:border-sky-500 disabled:opacity-50"
+          />
           <select
-            aria-label="Choisir un membre à ajouter"
-            value={toAdd}
-            onChange={(e) => setToAdd(e.target.value)}
-            disabled={busy || addable.length === 0}
-            className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-fg outline-none focus:border-sky-500 disabled:opacity-50"
+            value={inviteRole}
+            onChange={(e) => setInviteRole(e.target.value as Role)}
+            disabled={busy}
+            className="rounded-lg border border-border bg-surface px-2 py-2 text-sm text-fg outline-none focus:border-sky-500 disabled:opacity-50"
           >
-            <option value="">
-              {addable.length === 0
-                ? "Tous les membres sont déjà ajoutés"
-                : "Ajouter un membre…"}
-            </option>
-            {addable.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.displayName}
-              </option>
-            ))}
+            {(Object.entries(ROLE_LABELS) as [Role, string][]).map(
+              ([r, label]) => (
+                <option key={r} value={r}>
+                  {label}
+                </option>
+              ),
+            )}
           </select>
           <button
             type="button"
-            onClick={addMember}
-            disabled={busy || !toAdd}
-            className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-50"
+            onClick={inviteMember}
+            disabled={busy || !inviteEmail.trim()}
+            className="rounded-lg bg-violet-600 px-3 py-2 text-sm font-medium text-white hover:bg-violet-500 disabled:opacity-50"
           >
-            Ajouter
+            Inviter
           </button>
+        </div>
+
+        {inviteSuccess && (
+          <p className="mb-3 rounded-lg bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20">
+            Invitation envoyée à <strong>{inviteSuccess}</strong>. Elle apparaîtra
+            dans la liste une fois acceptée.
+          </p>
+        )}
+
+        <div className="mb-4 border-t border-border pt-4">
+          {/* ── Section 2 : Ajouter au projet ── */}
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
+            Ajouter au projet
+          </p>
+          <div className="flex gap-2">
+            <select
+              aria-label="Choisir un membre à ajouter"
+              value={toAdd}
+              onChange={(e) => setToAdd(e.target.value)}
+              disabled={busy || addable.length === 0}
+              className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-fg outline-none focus:border-sky-500 disabled:opacity-50"
+            >
+              <option value="">
+                {addable.length === 0
+                  ? "Tous les membres sont déjà ajoutés"
+                  : "Choisir un membre du workspace…"}
+              </option>
+              {addable.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.displayName}
+                </option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={addMember}
+              disabled={busy || !toAdd}
+              className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-50"
+            >
+              Ajouter
+            </button>
+          </div>
         </div>
 
         {actionError && (
@@ -133,7 +221,7 @@ export function MembersModal({
           </p>
         )}
 
-        {/* Current members */}
+        {/* ── Section 3 : Membres actuels ── */}
         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
           Membres du projet ({members.length})
         </p>
@@ -155,9 +243,18 @@ export function MembersModal({
                   className="flex items-center justify-between gap-2 px-3 py-2"
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-elevated text-[10px] font-semibold text-fg">
-                      {initials(m.displayName)}
-                    </span>
+                    {m.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={m.avatarUrl}
+                        alt={m.displayName}
+                        className="h-6 w-6 shrink-0 rounded-full ring-1 ring-border"
+                      />
+                    ) : (
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-elevated text-[10px] font-semibold text-fg">
+                        {initials(m.displayName)}
+                      </span>
+                    )}
                     <span className="truncate text-sm text-fg">
                       {m.displayName}
                     </span>

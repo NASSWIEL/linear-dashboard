@@ -315,6 +315,33 @@ export async function archiveIssue(id: string): Promise<boolean> {
   return data.issueArchive.success;
 }
 
+// --- Workspace invite -------------------------------------------------------
+
+export async function inviteWorkspaceMember(
+  email: string,
+  role: "member" | "admin" | "guest" = "member",
+): Promise<{ email: string }> {
+  const teamId = await getTeamId();
+  const data = await linearQuery<{
+    organizationInviteCreate: {
+      success: boolean;
+      organizationInvite: { id: string; email: string } | null;
+    };
+  }>(
+    `mutation InviteWorkspaceMember($input: OrganizationInviteCreateInput!) {
+      organizationInviteCreate(input: $input) {
+        success
+        organizationInvite { id email }
+      }
+    }`,
+    { input: { email, role, teamIds: [teamId] } },
+  );
+  if (!data.organizationInviteCreate.success) {
+    throw new Error(`Impossible d'inviter ${email}.`);
+  }
+  return { email };
+}
+
 // --- Project CRUD ----------------------------------------------------------
 
 export async function createProject(input: CreateProjectInput): Promise<Project> {
