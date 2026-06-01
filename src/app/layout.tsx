@@ -26,13 +26,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <head>
-        {/* Apply the saved theme before paint to avoid a flash. Default = dark. */}
+        {/* Apply the saved theme before paint to avoid a flash. Default = light. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme');if(t==='light'){document.documentElement.classList.remove('dark')}else{document.documentElement.classList.add('dark')}}catch(e){}`,
+            __html: `try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}`,
           }}
         />
       </head>
