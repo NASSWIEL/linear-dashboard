@@ -28,6 +28,7 @@ import { StatusChart } from "./StatusChart";
 import { PriorityBreakdown } from "./PriorityBreakdown";
 import { IssueModal } from "./IssueModal";
 import { MembersModal } from "./MembersModal";
+import { ThemeToggle } from "./ThemeToggle";
 
 const FILTER_LABELS: Record<MetricFilter, string> = {
   all: "All",
@@ -221,7 +222,7 @@ export function Dashboard() {
         editIssue: (issueId) => setModal({ mode: "edit", issueId }),
       }}
     >
-      <div className="flex min-h-screen w-full bg-zinc-950 text-zinc-100">
+      <div className="flex min-h-screen w-full bg-bg text-fg">
         <Sidebar
           projects={projects}
           selectedId={selectedId}
@@ -235,34 +236,35 @@ export function Dashboard() {
         />
 
         <main className="flex-1 overflow-x-hidden">
-          <header className="flex items-center justify-between gap-4 border-b border-zinc-800 px-6 py-4">
+          <header className="flex items-center justify-between gap-4 border-b border-border px-6 py-4">
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold text-zinc-100">
+                <h1 className="text-lg font-semibold text-fg">
                   {selectedProjectName}
                 </h1>
                 {assigneeLabel && (
                   <button
                     type="button"
                     onClick={() => setParam("assignee", "all")}
-                    className="inline-flex items-center gap-1 rounded-full border border-violet-500/40 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 hover:bg-violet-500/20"
+                    className="inline-flex items-center gap-1 rounded-full border border-violet-500/40 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300 hover:bg-violet-500/20"
                   >
                     👤 {assigneeLabel} ✕
                   </button>
                 )}
               </div>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted">
                 {issuesData
                   ? `Updated ${relativeTime(new Date(issuesData.fetchedAt).toISOString())}`
                   : "Loading…"}
               </p>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               {selectedId !== "all" && (
                 <button
                   type="button"
                   onClick={() => setMembersOpen(true)}
-                  className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white"
+                  className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border hover:text-fg"
                 >
                   👥 Membres
                 </button>
@@ -277,11 +279,11 @@ export function Dashboard() {
               <button
                 type="button"
                 onClick={() => mutate()}
-                className="flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white"
+                className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border hover:text-fg"
               >
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
-                    isValidating ? "animate-pulse bg-sky-400" : "bg-zinc-600"
+                    isValidating ? "animate-pulse bg-sky-400" : "bg-faint"
                   }`}
                 />
                 Refresh
@@ -291,12 +293,12 @@ export function Dashboard() {
 
           <div className="space-y-5 p-6">
             {actionError && (
-              <div className="flex items-center justify-between rounded-lg border border-red-900/50 bg-red-950/30 px-4 py-2 text-sm text-red-200">
+              <div className="flex items-center justify-between rounded-lg border border-red-900/50 bg-red-950/30 px-4 py-2 text-sm text-red-700 dark:text-red-200">
                 <span>{actionError}</span>
                 <button
                   type="button"
                   onClick={() => setActionError(null)}
-                  className="text-red-300 hover:text-red-100"
+                  className="text-red-700 dark:text-red-300 hover:text-red-100"
                 >
                   ✕
                 </button>
@@ -318,14 +320,14 @@ export function Dashboard() {
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_320px]">
                   <div className="min-w-0">
                     <div className="mb-3 flex items-center gap-2">
-                      <h2 className="text-sm font-semibold text-zinc-300">
+                      <h2 className="text-sm font-semibold text-muted">
                         Board
                       </h2>
                       {filter !== "all" && (
                         <button
                           type="button"
                           onClick={() => setParam("filter", "all")}
-                          className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-300 hover:bg-sky-500/20"
+                          className="inline-flex items-center gap-1 rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-700 dark:text-sky-300 hover:bg-sky-500/20"
                         >
                           {FILTER_LABELS[filter]} ✕
                         </button>
@@ -378,11 +380,11 @@ function LoadingState() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="h-24 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/60"
+            className="h-24 animate-pulse rounded-xl border border-border bg-surface/60"
           />
         ))}
       </div>
-      <div className="h-72 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900/40" />
+      <div className="h-72 animate-pulse rounded-xl border border-border bg-surface/40" />
     </div>
   );
 }
@@ -396,11 +398,11 @@ function ErrorState({
 }) {
   return (
     <div className="rounded-xl border border-red-900/50 bg-red-950/30 p-6">
-      <h2 className="text-sm font-semibold text-red-300">
+      <h2 className="text-sm font-semibold text-red-700 dark:text-red-300">
         Couldn’t load Linear data
       </h2>
-      <p className="mt-1 max-w-2xl text-sm text-red-200/80">{message}</p>
-      <p className="mt-2 text-xs text-red-200/60">
+      <p className="mt-1 max-w-2xl text-sm text-red-700 dark:text-red-200/80">{message}</p>
+      <p className="mt-2 text-xs text-red-700 dark:text-red-200/60">
         Check that <code className="font-mono">LINEAR_API_KEY</code> is set in{" "}
         <code className="font-mono">.env.local</code> (Linear → Settings → API →
         Personal API keys).

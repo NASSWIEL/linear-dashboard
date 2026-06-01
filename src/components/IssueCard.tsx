@@ -19,7 +19,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
 
   return (
     <div
-      className={`rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 transition-colors hover:border-zinc-700 ${
+      className={`rounded-lg border border-border bg-surface/60 p-3 transition-colors hover:border-border ${
         busy ? "opacity-60" : ""
       }`}
     >
@@ -28,7 +28,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
           href={issue.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-mono text-xs text-zinc-500 hover:text-zinc-300"
+          className="font-mono text-xs text-muted hover:text-muted"
         >
           {issue.identifier}
         </a>
@@ -46,7 +46,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
         href={issue.url}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-1.5 block line-clamp-2 text-sm font-medium text-zinc-100 hover:text-white"
+        className="mt-1.5 block line-clamp-2 text-sm font-medium text-fg hover:text-fg"
       >
         {issue.title}
       </a>
@@ -56,7 +56,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
           {issue.labels.slice(0, 3).map((label) => (
             <span
               key={label.name}
-              className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300"
+              className="inline-flex items-center gap-1 rounded-full bg-elevated px-2 py-0.5 text-[10px] text-muted"
             >
               <span
                 className="h-1.5 w-1.5 rounded-full"
@@ -78,12 +78,12 @@ export function IssueCard({ issue }: { issue: Issue }) {
         <span
           className={`text-[11px] font-medium ${
             isDone
-              ? "text-zinc-600"
+              ? "text-faint"
               : overdue
-                ? "text-red-400"
+                ? "text-red-700 dark:text-red-400"
                 : due
-                  ? "text-zinc-500"
-                  : "text-zinc-600"
+                  ? "text-muted"
+                  : "text-faint"
           }`}
         >
           {isDone
@@ -97,7 +97,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
 
         {confirmArchive ? (
           <span className="flex items-center gap-1.5 text-[11px]">
-            <span className="text-zinc-400">Archive?</span>
+            <span className="text-muted">Archive?</span>
             <button
               type="button"
               disabled={busy}
@@ -110,7 +110,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
             <button
               type="button"
               onClick={() => setConfirmArchive(false)}
-              className="rounded bg-zinc-700 px-1.5 py-0.5 text-zinc-200 hover:bg-zinc-600"
+              className="rounded bg-elevated px-1.5 py-0.5 text-fg hover:bg-faint"
             >
               No
             </button>
@@ -121,7 +121,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
               type="button"
               aria-label={`Edit ${issue.identifier}`}
               onClick={() => editIssue(issue.id)}
-              className="text-zinc-400 hover:text-sky-300"
+              className="text-muted hover:text-sky-300"
             >
               Edit
             </button>
@@ -129,7 +129,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
               type="button"
               aria-label={`Archive ${issue.identifier}`}
               onClick={() => setConfirmArchive(true)}
-              className="text-zinc-400 hover:text-red-400"
+              className="text-muted hover:text-red-400"
             >
               Archive
             </button>

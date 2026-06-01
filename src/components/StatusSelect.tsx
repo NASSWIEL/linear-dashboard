@@ -22,7 +22,7 @@ export function StatusSelect({ issue }: { issue: Issue }) {
         disabled={busy || states.length === 0}
         value={current?.id ?? ""}
         onChange={(e) => updateIssue(issue.id, { stateId: e.target.value })}
-        className="max-w-[7.5rem] cursor-pointer rounded-md border border-zinc-700 bg-zinc-800 px-1.5 py-1 text-[11px] text-zinc-200 outline-none hover:border-zinc-600 focus:border-sky-500 disabled:opacity-50"
+        className="max-w-[7.5rem] cursor-pointer rounded-md border border-border bg-elevated px-1.5 py-1 text-[11px] text-fg outline-none hover:border-border focus:border-sky-500 disabled:opacity-50"
       >
         {!current && <option value="">{issue.state.name}</option>}
         {states.map((s) => (

@@ -23,7 +23,7 @@ export function Sidebar({
   countByAssignee: (key: string) => number;
 }) {
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-bg">
       <div className="flex items-center gap-2.5 px-5 py-5">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white p-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -34,13 +34,13 @@ export function Sidebar({
           />
         </span>
         <div className="leading-tight">
-          <p className="text-sm font-semibold text-zinc-100">Suivi IA — AT</p>
-          <p className="text-[11px] text-zinc-500">CGI · Unité AT</p>
+          <p className="text-sm font-semibold text-fg">Suivi IA — AT</p>
+          <p className="text-[11px] text-muted">CGI · Unité AT</p>
         </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-2">
-        <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+        <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
           Projects
         </p>
 
@@ -64,10 +64,10 @@ export function Sidebar({
         ))}
 
         {projects.length === 0 && (
-          <p className="px-2 py-2 text-xs text-zinc-600">No projects found.</p>
+          <p className="px-2 py-2 text-xs text-faint">No projects found.</p>
         )}
 
-        <p className="px-2 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+        <p className="px-2 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-faint">
           People
         </p>
 
@@ -100,8 +100,8 @@ export function Sidebar({
         />
       </nav>
 
-      <div className="border-t border-zinc-800 px-5 py-3">
-        <div className="flex items-center gap-2 text-[11px] text-zinc-500">
+      <div className="border-t border-border px-5 py-3">
+        <div className="flex items-center gap-2 text-[11px] text-muted">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -132,8 +132,8 @@ function ProjectItem({
       onClick={onClick}
       className={`mt-0.5 flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
         active
-          ? "bg-zinc-800 text-zinc-100"
-          : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+          ? "bg-elevated text-fg"
+          : "text-muted hover:bg-surface hover:text-fg"
       }`}
     >
       <span className="flex min-w-0 items-center gap-2">
@@ -143,7 +143,7 @@ function ProjectItem({
         />
         <span className="truncate">{label}</span>
       </span>
-      <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[11px] tabular-nums text-zinc-400">
+      <span className="shrink-0 rounded-full bg-elevated px-1.5 py-0.5 text-[11px] tabular-nums text-muted">
         {count}
       </span>
     </button>
@@ -172,32 +172,32 @@ function PersonItem({
       onClick={onClick}
       className={`mt-0.5 flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
         active
-          ? "bg-zinc-800 text-zinc-100"
-          : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+          ? "bg-elevated text-fg"
+          : "text-muted hover:bg-surface hover:text-fg"
       }`}
     >
       <span className="flex min-w-0 items-center gap-2">
         {variant === "everyone" ? (
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-[9px] text-zinc-200">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-elevated text-[9px] text-fg">
             ∗
           </span>
         ) : variant === "unassigned" ? (
-          <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-zinc-600" />
+          <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-border" />
         ) : avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={avatarUrl}
             alt={label}
-            className="h-5 w-5 shrink-0 rounded-full ring-1 ring-zinc-700"
+            className="h-5 w-5 shrink-0 rounded-full ring-1 ring-border"
           />
         ) : (
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-[9px] font-semibold text-zinc-200">
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-elevated text-[9px] font-semibold text-fg">
             {initials(label)}
           </span>
         )}
         <span className="truncate">{label}</span>
       </span>
-      <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[11px] tabular-nums text-zinc-400">
+      <span className="shrink-0 rounded-full bg-elevated px-1.5 py-0.5 text-[11px] tabular-nums text-muted">
         {count}
       </span>
     </button>

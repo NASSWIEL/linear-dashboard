@@ -10,7 +10,7 @@ export function KanbanBoard({
 }) {
   if (columns.length === 0) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-zinc-800 text-sm text-zinc-500">
+      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-border text-sm text-muted">
         No issues to display for this selection.
       </div>
     );
@@ -30,19 +30,19 @@ export function KanbanBoard({
         return (
           <section
             key={col.name}
-            className="flex w-72 shrink-0 flex-col rounded-xl border border-zinc-800 bg-zinc-950/40"
+            className="flex w-72 shrink-0 flex-col rounded-xl border border-border bg-bg/40"
           >
-            <header className="flex items-center justify-between gap-2 border-b border-zinc-800 px-3 py-2.5">
+            <header className="flex items-center justify-between gap-2 border-b border-border px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <span
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ backgroundColor: col.color }}
                 />
-                <span className="text-sm font-semibold text-zinc-200">
+                <span className="text-sm font-semibold text-fg">
                   {col.name}
                 </span>
               </div>
-              <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-medium text-zinc-400">
+              <span className="rounded-full bg-elevated px-2 py-0.5 text-xs font-medium text-muted">
                 {col.count}
               </span>
             </header>

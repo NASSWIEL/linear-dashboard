@@ -82,20 +82,20 @@ export function MembersModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-border bg-bg p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-zinc-100">Membres</h2>
+          <h2 className="text-base font-semibold text-fg">Membres</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-200"
+            className="text-muted hover:text-fg"
           >
             ✕
           </button>
         </div>
-        <p className="mb-4 truncate text-xs text-zinc-500">{projectName}</p>
+        <p className="mb-4 truncate text-xs text-muted">{projectName}</p>
 
         {/* Add member */}
         <div className="mb-4 flex gap-2">
@@ -104,7 +104,7 @@ export function MembersModal({
             value={toAdd}
             onChange={(e) => setToAdd(e.target.value)}
             disabled={busy || addable.length === 0}
-            className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-2 text-sm text-zinc-100 outline-none focus:border-sky-500 disabled:opacity-50"
+            className="flex-1 rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-fg outline-none focus:border-sky-500 disabled:opacity-50"
           >
             <option value="">
               {addable.length === 0
@@ -128,25 +128,25 @@ export function MembersModal({
         </div>
 
         {actionError && (
-          <p className="mb-3 rounded-lg bg-red-950/40 px-3 py-2 text-xs text-red-300">
+          <p className="mb-3 rounded-lg bg-red-950/40 px-3 py-2 text-xs text-red-700 dark:text-red-300">
             {actionError}
           </p>
         )}
 
         {/* Current members */}
-        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+        <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
           Membres du projet ({members.length})
         </p>
         {error ? (
-          <p className="py-4 text-sm text-red-300">
+          <p className="py-4 text-sm text-red-700 dark:text-red-300">
             {(error as Error).message}
           </p>
         ) : isLoading ? (
-          <p className="py-4 text-sm text-zinc-500">Chargement…</p>
+          <p className="py-4 text-sm text-muted">Chargement…</p>
         ) : members.length === 0 ? (
-          <p className="py-4 text-sm text-zinc-500">Aucun membre.</p>
+          <p className="py-4 text-sm text-muted">Aucun membre.</p>
         ) : (
-          <ul className="divide-y divide-zinc-800 rounded-lg border border-zinc-800">
+          <ul className="divide-y divide-border rounded-lg border border-border">
             {members.map((m) => {
               const isLead = m.id === leadId;
               return (
@@ -155,14 +155,14 @@ export function MembersModal({
                   className="flex items-center justify-between gap-2 px-3 py-2"
                 >
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-[10px] font-semibold text-zinc-200">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-elevated text-[10px] font-semibold text-fg">
                       {initials(m.displayName)}
                     </span>
-                    <span className="truncate text-sm text-zinc-200">
+                    <span className="truncate text-sm text-fg">
                       {m.displayName}
                     </span>
                     {isLead && (
-                      <span className="shrink-0 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300 ring-1 ring-violet-500/30">
+                      <span className="shrink-0 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/30">
                         responsable
                       </span>
                     )}
@@ -170,7 +170,7 @@ export function MembersModal({
                   {isLead ? (
                     <span
                       title="Le responsable du projet ne peut pas être retiré"
-                      className="shrink-0 text-[11px] text-zinc-600"
+                      className="shrink-0 text-[11px] text-faint"
                     >
                       —
                     </span>
@@ -180,7 +180,7 @@ export function MembersModal({
                       aria-label={`Retirer ${m.displayName}`}
                       onClick={() => removeMember(m.id)}
                       disabled={busy}
-                      className="shrink-0 rounded-md border border-zinc-700 px-2 py-1 text-[11px] text-zinc-300 hover:border-red-700 hover:text-red-300 disabled:opacity-50"
+                      className="shrink-0 rounded-md border border-border px-2 py-1 text-[11px] text-muted hover:border-red-700 hover:text-red-300 disabled:opacity-50"
                     >
                       Retirer
                     </button>

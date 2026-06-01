@@ -1,29 +1,62 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light theme (default). The .dark class overrides these. */
+:root {
+  --bg: #f4f4f5; /* zinc-100 */
+  --surface: #ffffff;
+  --elevated: #e4e4e7; /* zinc-200 */
+  --border: #e4e4e7; /* zinc-200 */
+  --fg: #18181b; /* zinc-900 */
+  --muted: #52525b; /* zinc-600 */
+  --faint: #a1a1aa; /* zinc-400 */
+  --scrollbar: #d4d4d8;
+}
+
+.dark {
+  --bg: #09090b; /* zinc-950 */
+  --surface: #18181b; /* zinc-900 */
+  --elevated: #27272a; /* zinc-800 */
+  --border: #27272a; /* zinc-800 */
+  --fg: #fafafa; /* zinc-50 */
+  --muted: #a1a1aa; /* zinc-400 */
+  --faint: #71717a; /* zinc-500 */
+  --scrollbar: #3f3f46;
+}
+
+/* Expose tokens as Tailwind color utilities (bg-bg, text-fg, border-border…).
+   `inline` keeps the var reference so values switch with the theme class. */
 @theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-elevated: var(--elevated);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 body {
-  background: #09090b; /* zinc-950 */
-  color: #fafafa; /* zinc-50 */
+  background: var(--bg);
+  color: var(--fg);
 }
 
-/* Slimmer, dark scrollbars for the kanban overflow areas. */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #3f3f46 transparent;
+  scrollbar-color: var(--scrollbar) transparent;
 }
 *::-webkit-scrollbar {
   height: 8px;
   width: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background-color: #3f3f46;
+  background-color: var(--scrollbar);
   border-radius: 9999px;
 }

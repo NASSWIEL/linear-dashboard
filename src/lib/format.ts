@@ -12,31 +12,31 @@ export function priorityStyle(label: string): PriorityStyle {
       return {
         label,
         dot: "bg-red-500",
-        badge: "bg-red-500/10 text-red-300 ring-1 ring-red-500/30",
+        badge: "bg-red-500/10 text-red-700 dark:text-red-300 ring-1 ring-red-500/30",
       };
     case "High":
       return {
         label,
         dot: "bg-orange-500",
-        badge: "bg-orange-500/10 text-orange-300 ring-1 ring-orange-500/30",
+        badge: "bg-orange-500/10 text-orange-700 dark:text-orange-300 ring-1 ring-orange-500/30",
       };
     case "Medium":
       return {
         label,
         dot: "bg-amber-400",
-        badge: "bg-amber-400/10 text-amber-200 ring-1 ring-amber-400/30",
+        badge: "bg-amber-400/10 text-amber-700 dark:text-amber-200 ring-1 ring-amber-400/30",
       };
     case "Low":
       return {
         label,
         dot: "bg-sky-500",
-        badge: "bg-sky-500/10 text-sky-300 ring-1 ring-sky-500/30",
+        badge: "bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30",
       };
     default:
       return {
         label: "No priority",
-        dot: "bg-zinc-600",
-        badge: "bg-zinc-500/10 text-zinc-400 ring-1 ring-zinc-500/20",
+        dot: "bg-faint",
+        badge: "bg-zinc-500/10 text-muted ring-1 ring-zinc-500/20",
       };
   }
 }

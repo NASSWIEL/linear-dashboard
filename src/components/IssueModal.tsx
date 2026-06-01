@@ -96,17 +96,17 @@ export function IssueModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-950 p-5 shadow-2xl"
+        className="w-full max-w-lg rounded-2xl border border-border bg-bg p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-base font-semibold text-zinc-100">
+          <h2 className="text-base font-semibold text-fg">
             {mode === "create" ? "New issue" : `Edit ${issue?.identifier}`}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-200"
+            className="text-muted hover:text-fg"
           >
             ✕
           </button>
@@ -114,18 +114,18 @@ export function IssueModal({
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="mb-1 block text-xs text-zinc-400">Title</label>
+            <label className="mb-1 block text-xs text-muted">Title</label>
             <input
               autoFocus
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Issue title"
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-sky-500"
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs text-zinc-400">
+            <label className="mb-1 block text-xs text-muted">
               Description
             </label>
             <textarea
@@ -133,7 +133,7 @@ export function IssueModal({
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
               placeholder="Add a description…"
-              className="w-full resize-y rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-sky-500"
+              className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
             />
           </div>
 
@@ -208,7 +208,7 @@ export function IssueModal({
           </div>
 
           {error && (
-            <p className="rounded-lg bg-red-950/40 px-3 py-2 text-xs text-red-300">
+            <p className="rounded-lg bg-red-950/40 px-3 py-2 text-xs text-red-700 dark:text-red-300">
               {error}
             </p>
           )}
@@ -217,7 +217,7 @@ export function IssueModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-900"
+              className="rounded-lg border border-border px-3 py-2 text-sm text-muted hover:bg-surface"
             >
               Cancel
             </button>
@@ -240,7 +240,7 @@ export function IssueModal({
 }
 
 const selectCls =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-2.5 py-2 text-sm text-zinc-100 outline-none focus:border-sky-500";
+  "w-full rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-fg outline-none focus:border-sky-500";
 
 function Field({
   label,
@@ -251,7 +251,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs text-zinc-400">{label}</label>
+      <label className="mb-1 block text-xs text-muted">{label}</label>
       {children}
     </div>
   );

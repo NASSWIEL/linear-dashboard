@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-sm text-zinc-500">
+        <div className="flex min-h-screen items-center justify-center bg-bg text-sm text-muted">
           Loading dashboard…
         </div>
       }

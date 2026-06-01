@@ -13,11 +13,11 @@ export function StatusChart({
   const data = columns.filter((c) => c.count > 0);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-4">
-      <h2 className="text-sm font-semibold text-zinc-200">Status breakdown</h2>
+    <div className="rounded-xl border border-border bg-surface/60 p-4">
+      <h2 className="text-sm font-semibold text-fg">Status breakdown</h2>
 
       {data.length === 0 ? (
-        <p className="py-10 text-center text-sm text-zinc-500">No data</p>
+        <p className="py-10 text-center text-sm text-muted">No data</p>
       ) : (
         <div className="mt-2 flex items-center gap-4">
           <div className="relative h-36 w-36 shrink-0">
@@ -39,20 +39,20 @@ export function StatusChart({
               </Pie>
               <Tooltip
                 contentStyle={{
-                  background: "#18181b",
-                  border: "1px solid #3f3f46",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
                   borderRadius: 8,
                   fontSize: 12,
-                  color: "#e4e4e7",
+                  color: "var(--fg)",
                 }}
-                itemStyle={{ color: "#e4e4e7" }}
+                itemStyle={{ color: "var(--fg)" }}
               />
             </PieChart>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-semibold tabular-nums text-zinc-100">
+              <span className="text-2xl font-semibold tabular-nums text-fg">
                 {total}
               </span>
-              <span className="text-[10px] uppercase tracking-wide text-zinc-500">
+              <span className="text-[10px] uppercase tracking-wide text-muted">
                 issues
               </span>
             </div>
@@ -64,14 +64,14 @@ export function StatusChart({
                 key={entry.name}
                 className="flex items-center justify-between gap-2 text-xs"
               >
-                <span className="flex items-center gap-2 text-zinc-300">
+                <span className="flex items-center gap-2 text-muted">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
                     style={{ backgroundColor: entry.color }}
                   />
                   {entry.name}
                 </span>
-                <span className="tabular-nums text-zinc-500">{entry.count}</span>
+                <span className="tabular-nums text-muted">{entry.count}</span>
               </li>
             ))}
           </ul>
