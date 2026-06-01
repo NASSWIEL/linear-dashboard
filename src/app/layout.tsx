@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Linear Dashboard",
-  description: "Real-time view of Linear issues, status and overdue work.",
+  title: "Suivi IA — AT · CGI",
+  description: "Suivi des projets IA — CGI, Unité AT.",
 };
 
 export default function RootLayout({

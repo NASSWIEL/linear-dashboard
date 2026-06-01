@@ -110,6 +110,11 @@ export interface MetaResponse {
   states: WorkflowStateOption[];
 }
 
+export interface ProjectMembership {
+  members: User[];
+  leadId: string | null;
+}
+
 export interface CreateIssueInput {
   title: string;
   description?: string;

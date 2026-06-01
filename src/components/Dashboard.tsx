@@ -27,8 +27,7 @@ import { OverduePanel } from "./OverduePanel";
 import { StatusChart } from "./StatusChart";
 import { PriorityBreakdown } from "./PriorityBreakdown";
 import { IssueModal } from "./IssueModal";
-
-const TEAM_KEY = process.env.NEXT_PUBLIC_LINEAR_TEAM_KEY ?? "REC";
+import { MembersModal } from "./MembersModal";
 
 const FILTER_LABELS: Record<MetricFilter, string> = {
   all: "All",
@@ -84,6 +83,7 @@ export function Dashboard() {
   const [busyIssueId, setBusyIssueId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState>(null);
+  const [membersOpen, setMembersOpen] = useState(false);
 
   const allIssues = useMemo(() => issuesData?.issues ?? [], [issuesData]);
   const projects = projectsData?.projects ?? [];
@@ -228,7 +228,6 @@ export function Dashboard() {
           onSelect={(id) => setParam("project", id)}
           totalCount={allIssues.length}
           countFor={countFor}
-          teamKey={TEAM_KEY}
           members={members}
           selectedAssignee={assignee}
           onSelectAssignee={(key) => setParam("assignee", key)}
@@ -259,6 +258,15 @@ export function Dashboard() {
               </p>
             </div>
             <div className="flex items-center gap-2">
+              {selectedId !== "all" && (
+                <button
+                  type="button"
+                  onClick={() => setMembersOpen(true)}
+                  className="rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-colors hover:border-zinc-700 hover:text-white"
+                >
+                  👥 Membres
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setModal({ mode: "create" })}
@@ -348,6 +356,15 @@ export function Dashboard() {
           onClose={() => setModal(null)}
           onCreate={modalCreate}
           onUpdate={modalUpdate}
+        />
+      )}
+
+      {membersOpen && selectedId !== "all" && (
+        <MembersModal
+          projectId={selectedId}
+          projectName={selectedProjectName}
+          workspaceUsers={members}
+          onClose={() => setMembersOpen(false)}
         />
       )}
     </DashboardProvider>

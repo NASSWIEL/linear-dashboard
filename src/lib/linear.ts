@@ -4,6 +4,7 @@ import type {
   CreateIssueInput,
   Issue,
   Project,
+  ProjectMembership,
   UpdateIssueInput,
   User,
   WorkflowStateOption,
@@ -311,4 +312,82 @@ export async function archiveIssue(id: string): Promise<boolean> {
     { id },
   );
   return data.issueArchive.success;
+}
+
+// --- Project members -------------------------------------------------------
+// Linear has no add/remove member mutation; membership is the full memberIds
+// array on projectUpdate. So we read the current set and write the change.
+
+export async function fetchProjectMembership(
+  projectId: string,
+): Promise<ProjectMembership> {
+  const data = await linearQuery<{
+    project: {
+      lead: { id: string } | null;
+      members: {
+        nodes: {
+          id: string;
+          name: string;
+          displayName: string;
+          avatarUrl: string | null;
+        }[];
+      };
+    };
+  }>(
+    `query ProjMembers($id:String!){
+      project(id:$id){
+        lead { id }
+        members { nodes { id name displayName avatarUrl } }
+      }
+    }`,
+    { id: projectId },
+  );
+  return {
+    leadId: data.project.lead?.id ?? null,
+    members: data.project.members.nodes.map((u) => ({
+      id: u.id,
+      name: u.name,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl ?? null,
+    })),
+  };
+}
+
+async function currentMemberIds(projectId: string): Promise<string[]> {
+  const { members } = await fetchProjectMembership(projectId);
+  return members.map((m) => m.id);
+}
+
+async function setProjectMembers(
+  projectId: string,
+  memberIds: string[],
+): Promise<void> {
+  const data = await linearQuery<{ projectUpdate: { success: boolean } }>(
+    `mutation SetMembers($id:String!, $input: ProjectUpdateInput!){
+      projectUpdate(id:$id, input:$input){ success }
+    }`,
+    { id: projectId, input: { memberIds } },
+  );
+  if (!data.projectUpdate.success) throw new Error("Linear projectUpdate failed.");
+}
+
+export async function addProjectMember(
+  projectId: string,
+  userId: string,
+): Promise<ProjectMembership> {
+  const ids = await currentMemberIds(projectId);
+  if (!ids.includes(userId)) await setProjectMembers(projectId, [...ids, userId]);
+  return fetchProjectMembership(projectId);
+}
+
+export async function removeProjectMember(
+  projectId: string,
+  userId: string,
+): Promise<ProjectMembership> {
+  const ids = await currentMemberIds(projectId);
+  await setProjectMembers(
+    projectId,
+    ids.filter((i) => i !== userId),
+  );
+  return fetchProjectMembership(projectId);
 }

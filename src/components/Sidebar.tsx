@@ -7,7 +7,6 @@ export function Sidebar({
   onSelect,
   totalCount,
   countFor,
-  teamKey,
   members,
   selectedAssignee,
   onSelectAssignee,
@@ -18,7 +17,6 @@ export function Sidebar({
   onSelect: (id: string) => void;
   totalCount: number;
   countFor: (projectId: string) => number;
-  teamKey: string;
   members: User[];
   selectedAssignee: string;
   onSelectAssignee: (key: string) => void;
@@ -27,12 +25,12 @@ export function Sidebar({
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
       <div className="flex items-center gap-2.5 px-5 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white">
-          L
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white">
+          AT
         </span>
         <div className="leading-tight">
-          <p className="text-sm font-semibold text-zinc-100">Linear Dashboard</p>
-          <p className="text-[11px] text-zinc-500">Team {teamKey}</p>
+          <p className="text-sm font-semibold text-zinc-100">Suivi IA — AT</p>
+          <p className="text-[11px] text-zinc-500">CGI · Unité AT</p>
         </div>
       </div>
 
