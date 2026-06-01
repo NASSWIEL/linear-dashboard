@@ -30,6 +30,7 @@ import { PriorityBreakdown } from "./PriorityBreakdown";
 import { IssueModal } from "./IssueModal";
 import { MembersModal } from "./MembersModal";
 import { AddProjectModal } from "./AddProjectModal";
+import { AssignProjectModal } from "./AssignProjectModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 const FILTER_LABELS: Record<MetricFilter, string> = {
@@ -90,6 +91,7 @@ export function Dashboard() {
   const [modal, setModal] = useState<ModalState>(null);
   const [membersOpen, setMembersOpen] = useState(false);
   const [addProjectOpen, setAddProjectOpen] = useState(false);
+  const [assignProjectOpen, setAssignProjectOpen] = useState(false);
 
   const allIssues = useMemo(() => issuesData?.issues ?? [], [issuesData]);
   const projects = projectsData?.projects ?? [];
@@ -300,6 +302,13 @@ export function Dashboard() {
                   </button>
                 </div>
               )}
+              <button
+                type="button"
+                onClick={() => setAssignProjectOpen(true)}
+                className="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border hover:text-fg"
+              >
+                Assigner aux projets
+              </button>
               {selectedId !== "all" && (
                 <button
                   type="button"
@@ -416,6 +425,14 @@ export function Dashboard() {
           onCreated={async () => {
             await mutateProjects();
           }}
+        />
+      )}
+
+      {assignProjectOpen && (
+        <AssignProjectModal
+          projects={projects}
+          workspaceUsers={members}
+          onClose={() => setAssignProjectOpen(false)}
         />
       )}
     </DashboardProvider>
