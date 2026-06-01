@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   CreateIssueInput,
+  CreateProjectInput,
   Issue,
   Project,
   ProjectMembership,
@@ -312,6 +313,40 @@ export async function archiveIssue(id: string): Promise<boolean> {
     { id },
   );
   return data.issueArchive.success;
+}
+
+// --- Project CRUD ----------------------------------------------------------
+
+export async function createProject(input: CreateProjectInput): Promise<Project> {
+  const teamId = await getTeamId();
+  const data = await linearQuery<{
+    projectCreate: { success: boolean; project: Project };
+  }>(
+    `mutation CreateProject($input: ProjectCreateInput!) {
+      projectCreate(input: $input) {
+        success
+        project { id name color state }
+      }
+    }`,
+    {
+      input: {
+        name: input.name,
+        description: input.description,
+        color: input.color,
+        teamIds: [teamId],
+      },
+    },
+  );
+  if (!data.projectCreate.success) throw new Error("Linear projectCreate failed.");
+  return data.projectCreate.project;
+}
+
+export async function archiveProject(id: string): Promise<boolean> {
+  const data = await linearQuery<{ projectArchive: { success: boolean } }>(
+    `mutation ArchiveProject($id: String!) { projectArchive(id: $id) { success } }`,
+    { id },
+  );
+  return data.projectArchive.success;
 }
 
 // --- Project members -------------------------------------------------------

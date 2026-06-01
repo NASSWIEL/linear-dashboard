@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import useSWR from "swr";
 
 import type {
@@ -28,6 +29,7 @@ import { StatusChart } from "./StatusChart";
 import { PriorityBreakdown } from "./PriorityBreakdown";
 import { IssueModal } from "./IssueModal";
 import { MembersModal } from "./MembersModal";
+import { AddProjectModal } from "./AddProjectModal";
 import { ThemeToggle } from "./ThemeToggle";
 
 const FILTER_LABELS: Record<MetricFilter, string> = {
@@ -71,7 +73,7 @@ export function Dashboard() {
     keepPreviousData: true,
   });
 
-  const { data: projectsData } = useSWR<ProjectsResponse>(
+  const { data: projectsData, mutate: mutateProjects } = useSWR<ProjectsResponse>(
     "/api/projects",
     fetcher,
     { refreshInterval: 60_000 },
@@ -81,10 +83,13 @@ export function Dashboard() {
     revalidateOnFocus: false,
   });
 
+  const { data: session } = useSession();
+
   const [busyIssueId, setBusyIssueId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState>(null);
   const [membersOpen, setMembersOpen] = useState(false);
+  const [addProjectOpen, setAddProjectOpen] = useState(false);
 
   const allIssues = useMemo(() => issuesData?.issues ?? [], [issuesData]);
   const projects = projectsData?.projects ?? [];
@@ -197,6 +202,19 @@ export function Dashboard() {
     }
   };
 
+  const ctxArchiveProject = async (id: string) => {
+    setActionError(null);
+    try {
+      const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Erreur archivage projet");
+      await mutateProjects();
+      if (selectedId === id) setParam("project", "all");
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Erreur archivage projet");
+    }
+  };
+
   // Modal actions: throw so the modal shows the error.
   const modalCreate = async (input: CreateIssueInput) => {
     await apiCreate(input);
@@ -227,6 +245,8 @@ export function Dashboard() {
           projects={projects}
           selectedId={selectedId}
           onSelect={(id) => setParam("project", id)}
+          onAddProject={() => setAddProjectOpen(true)}
+          onArchiveProject={ctxArchiveProject}
           totalCount={allIssues.length}
           countFor={countFor}
           members={members}
@@ -260,6 +280,26 @@ export function Dashboard() {
             </div>
             <div className="flex items-center gap-2">
               <ThemeToggle />
+              {session?.user && (
+                <div className="flex items-center gap-1.5">
+                  {session.user.image && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={session.user.image}
+                      alt={session.user.name ?? ""}
+                      className="h-6 w-6 rounded-full ring-1 ring-border"
+                    />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    className="text-xs text-muted hover:text-fg"
+                    title="Se déconnecter"
+                  >
+                    Déconnexion
+                  </button>
+                </div>
+              )}
               {selectedId !== "all" && (
                 <button
                   type="button"
@@ -367,6 +407,15 @@ export function Dashboard() {
           projectName={selectedProjectName}
           workspaceUsers={members}
           onClose={() => setMembersOpen(false)}
+        />
+      )}
+
+      {addProjectOpen && (
+        <AddProjectModal
+          onClose={() => setAddProjectOpen(false)}
+          onCreated={async () => {
+            await mutateProjects();
+          }}
         />
       )}
     </DashboardProvider>

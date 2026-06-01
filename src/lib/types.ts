@@ -134,6 +134,12 @@ export interface UpdateIssueInput {
   dueDate?: string | null;
 }
 
+export interface CreateProjectInput {
+  name: string;
+  description?: string;
+  color?: string;
+}
+
 // KPI-card click filters applied to the board (not the overview metrics).
 export type MetricFilter =
   | "all"
