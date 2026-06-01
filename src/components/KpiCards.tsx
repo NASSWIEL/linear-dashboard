@@ -24,10 +24,26 @@ export function KpiCards({
     {
       label: "Total issues",
       value: metrics.total,
-      hint: `${metrics.backlog} backlog · ${metrics.todo} todo`,
+      hint: "all statuses",
       accent: "text-zinc-100",
       ring: "ring-zinc-700/40",
       filter: "all",
+    },
+    {
+      label: "Backlog",
+      value: metrics.backlog,
+      hint: "not started",
+      accent: "text-zinc-300",
+      ring: "ring-zinc-600/40",
+      filter: "backlog",
+    },
+    {
+      label: "Todo",
+      value: metrics.todo,
+      hint: "ready to start",
+      accent: "text-indigo-300",
+      ring: "ring-indigo-500/30",
+      filter: "todo",
     },
     {
       label: "In progress",
@@ -56,7 +72,7 @@ export function KpiCards({
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       {kpis.map((kpi) => {
         const active = activeFilter === kpi.filter && kpi.filter !== "all";
         return (
@@ -80,7 +96,7 @@ export function KpiCards({
             {kpi.hint && <p className="mt-1 text-xs text-zinc-500">{kpi.hint}</p>}
             {active && (
               <p className="mt-1 text-[10px] font-medium text-sky-400">
-                Filtering board · click to clear
+                Filtering · click to clear
               </p>
             )}
           </button>
