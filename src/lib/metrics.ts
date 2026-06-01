@@ -118,6 +118,19 @@ export function filterByProject(
   return issues.filter((i) => i.project?.id === projectId);
 }
 
+/**
+ * Scope to a single assignee. "all" = no filter, "unassigned" = no assignee,
+ * otherwise match the assignee's user id.
+ */
+export function filterByAssignee(
+  issues: Issue[],
+  assigneeId: string | null,
+): Issue[] {
+  if (!assigneeId || assigneeId === "all") return issues;
+  if (assigneeId === "unassigned") return issues.filter((i) => !i.assignee);
+  return issues.filter((i) => i.assignee?.id === assigneeId);
+}
+
 /** Narrow the board to a KPI-card selection (clicking "Overdue", etc.). */
 export function filterByMetric(
   issues: Issue[],

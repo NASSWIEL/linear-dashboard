@@ -1,4 +1,5 @@
-import type { Project } from "@/lib/types";
+import type { Project, User } from "@/lib/types";
+import { initials } from "@/lib/format";
 
 export function Sidebar({
   projects,
@@ -7,6 +8,10 @@ export function Sidebar({
   totalCount,
   countFor,
   teamKey,
+  members,
+  selectedAssignee,
+  onSelectAssignee,
+  countByAssignee,
 }: {
   projects: Project[];
   selectedId: string;
@@ -14,6 +19,10 @@ export function Sidebar({
   totalCount: number;
   countFor: (projectId: string) => number;
   teamKey: string;
+  members: User[];
+  selectedAssignee: string;
+  onSelectAssignee: (key: string) => void;
+  countByAssignee: (key: string) => number;
 }) {
   return (
     <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-zinc-950">
@@ -54,6 +63,38 @@ export function Sidebar({
         {projects.length === 0 && (
           <p className="px-2 py-2 text-xs text-zinc-600">No projects found.</p>
         )}
+
+        <p className="px-2 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-zinc-600">
+          People
+        </p>
+
+        <PersonItem
+          active={selectedAssignee === "all"}
+          onClick={() => onSelectAssignee("all")}
+          variant="everyone"
+          label="Everyone"
+          count={countByAssignee("all")}
+        />
+
+        {members.map((m) => (
+          <PersonItem
+            key={m.id}
+            active={selectedAssignee === m.id}
+            onClick={() => onSelectAssignee(m.id)}
+            variant="member"
+            label={m.displayName}
+            avatarUrl={m.avatarUrl}
+            count={countByAssignee(m.id)}
+          />
+        ))}
+
+        <PersonItem
+          active={selectedAssignee === "unassigned"}
+          onClick={() => onSelectAssignee("unassigned")}
+          variant="unassigned"
+          label="Unassigned"
+          count={countByAssignee("unassigned")}
+        />
       </nav>
 
       <div className="border-t border-zinc-800 px-5 py-3">
@@ -97,6 +138,60 @@ function ProjectItem({
           className="h-2.5 w-2.5 shrink-0 rounded-sm"
           style={{ backgroundColor: dotColor }}
         />
+        <span className="truncate">{label}</span>
+      </span>
+      <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[11px] tabular-nums text-zinc-400">
+        {count}
+      </span>
+    </button>
+  );
+}
+
+function PersonItem({
+  active,
+  onClick,
+  variant,
+  label,
+  avatarUrl,
+  count,
+}: {
+  active: boolean;
+  onClick: () => void;
+  variant: "everyone" | "member" | "unassigned";
+  label: string;
+  avatarUrl?: string | null;
+  count: number;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={`Filter by ${label}`}
+      onClick={onClick}
+      className={`mt-0.5 flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
+        active
+          ? "bg-zinc-800 text-zinc-100"
+          : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+      }`}
+    >
+      <span className="flex min-w-0 items-center gap-2">
+        {variant === "everyone" ? (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-[9px] text-zinc-200">
+            ∗
+          </span>
+        ) : variant === "unassigned" ? (
+          <span className="h-5 w-5 shrink-0 rounded-full border border-dashed border-zinc-600" />
+        ) : avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt={label}
+            className="h-5 w-5 shrink-0 rounded-full ring-1 ring-zinc-700"
+          />
+        ) : (
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-zinc-700 text-[9px] font-semibold text-zinc-200">
+            {initials(label)}
+          </span>
+        )}
         <span className="truncate">{label}</span>
       </span>
       <span className="shrink-0 rounded-full bg-zinc-800 px-1.5 py-0.5 text-[11px] tabular-nums text-zinc-400">

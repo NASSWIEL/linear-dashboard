@@ -12,7 +12,12 @@ import type {
   ProjectsResponse,
   UpdateIssueInput,
 } from "@/lib/types";
-import { deriveMetrics, filterByMetric, filterByProject } from "@/lib/metrics";
+import {
+  deriveMetrics,
+  filterByAssignee,
+  filterByMetric,
+  filterByProject,
+} from "@/lib/metrics";
 import { relativeTime } from "@/lib/format";
 import { DashboardProvider } from "./DashboardContext";
 import { Sidebar } from "./Sidebar";
@@ -53,6 +58,7 @@ export function Dashboard() {
   const searchParams = useSearchParams();
   const selectedId = searchParams.get("project") ?? "all";
   const filter = (searchParams.get("filter") as MetricFilter) ?? "all";
+  const assignee = searchParams.get("assignee") ?? "all";
 
   const {
     data: issuesData,
@@ -82,17 +88,21 @@ export function Dashboard() {
   const allIssues = useMemo(() => issuesData?.issues ?? [], [issuesData]);
   const projects = projectsData?.projects ?? [];
 
-  // Overview metrics + charts reflect the whole (project-scoped) set.
+  // Scope = project, then assignee. Overview metrics + charts reflect the scope.
   const projectIssues = useMemo(
     () => filterByProject(allIssues, selectedId),
     [allIssues, selectedId],
   );
-  const metrics = useMemo(() => deriveMetrics(projectIssues), [projectIssues]);
+  const scopedIssues = useMemo(
+    () => filterByAssignee(projectIssues, assignee),
+    [projectIssues, assignee],
+  );
+  const metrics = useMemo(() => deriveMetrics(scopedIssues), [scopedIssues]);
 
   // The board narrows further to the active KPI filter.
   const boardIssues = useMemo(
-    () => filterByMetric(projectIssues, filter),
-    [projectIssues, filter],
+    () => filterByMetric(scopedIssues, filter),
+    [scopedIssues, filter],
   );
   const boardColumns = useMemo(
     () => deriveMetrics(boardIssues).columns,
@@ -101,6 +111,21 @@ export function Dashboard() {
 
   const countFor = (projectId: string) =>
     allIssues.filter((i) => i.project?.id === projectId).length;
+
+  // People counts reflect the current project scope.
+  const members = metaData?.users ?? [];
+  const countByAssignee = (key: string) => {
+    if (key === "all") return projectIssues.length;
+    if (key === "unassigned")
+      return projectIssues.filter((i) => !i.assignee).length;
+    return projectIssues.filter((i) => i.assignee?.id === key).length;
+  };
+  const assigneeLabel =
+    assignee === "all"
+      ? null
+      : assignee === "unassigned"
+        ? "Unassigned"
+        : (members.find((m) => m.id === assignee)?.displayName ?? "Member");
 
   const selectedProjectName =
     selectedId === "all"
@@ -204,14 +229,29 @@ export function Dashboard() {
           totalCount={allIssues.length}
           countFor={countFor}
           teamKey={TEAM_KEY}
+          members={members}
+          selectedAssignee={assignee}
+          onSelectAssignee={(key) => setParam("assignee", key)}
+          countByAssignee={countByAssignee}
         />
 
         <main className="flex-1 overflow-x-hidden">
           <header className="flex items-center justify-between gap-4 border-b border-zinc-800 px-6 py-4">
             <div>
-              <h1 className="text-lg font-semibold text-zinc-100">
-                {selectedProjectName}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-semibold text-zinc-100">
+                  {selectedProjectName}
+                </h1>
+                {assigneeLabel && (
+                  <button
+                    type="button"
+                    onClick={() => setParam("assignee", "all")}
+                    className="inline-flex items-center gap-1 rounded-full border border-violet-500/40 bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 hover:bg-violet-500/20"
+                  >
+                    👤 {assigneeLabel} ✕
+                  </button>
+                )}
+              </div>
               <p className="text-xs text-zinc-500">
                 {issuesData
                   ? `Updated ${relativeTime(new Date(issuesData.fetchedAt).toISOString())}`

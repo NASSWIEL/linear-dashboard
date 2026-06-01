@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Issue, IssueState, WorkflowStateType } from "./types";
 import {
   deriveMetrics,
+  filterByAssignee,
   filterByMetric,
   filterByProject,
   isOverdue,
@@ -231,6 +232,39 @@ describe("filterByMetric", () => {
     const r = filterByMetric(issues, "unassigned", TODAY).map((i) => i.identifier);
     expect(r).not.toContain("7");
     expect(r).toHaveLength(6);
+  });
+});
+
+describe("filterByAssignee", () => {
+  const u = (id: string) => ({
+    id,
+    name: id,
+    displayName: id,
+    avatarUrl: null,
+  });
+  const issues = [
+    mk({ identifier: "1", assignee: u("alice") }),
+    mk({ identifier: "2", assignee: u("bob") }),
+    mk({ identifier: "3", assignee: u("alice") }),
+    mk({ identifier: "4", assignee: null }),
+  ];
+
+  it("returns all for 'all' or null", () => {
+    expect(filterByAssignee(issues, "all")).toHaveLength(4);
+    expect(filterByAssignee(issues, null)).toHaveLength(4);
+  });
+
+  it("filters to a specific member", () => {
+    expect(filterByAssignee(issues, "alice").map((i) => i.identifier)).toEqual([
+      "1",
+      "3",
+    ]);
+  });
+
+  it("filters unassigned", () => {
+    expect(
+      filterByAssignee(issues, "unassigned").map((i) => i.identifier),
+    ).toEqual(["4"]);
   });
 });
 
