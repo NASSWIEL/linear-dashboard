@@ -27,6 +27,7 @@ import { KanbanBoard } from "./KanbanBoard";
 import { OverduePanel } from "./OverduePanel";
 import { StatusChart } from "./StatusChart";
 import { PriorityBreakdown } from "./PriorityBreakdown";
+import { AISummaryPanel } from "./AISummaryPanel";
 import { IssueModal } from "./IssueModal";
 import { MembersModal } from "./MembersModal";
 import { AddProjectModal } from "./AddProjectModal";
@@ -386,6 +387,11 @@ export function Dashboard() {
                   </div>
 
                   <div className="space-y-5">
+                    <AISummaryPanel
+                      issues={scopedIssues}
+                      projectName={selectedProjectName}
+                      assigneeLabel={assigneeLabel}
+                    />
                     <StatusChart columns={metrics.columns} total={metrics.total} />
                     <PriorityBreakdown buckets={metrics.byPriority} />
                     <OverduePanel issues={metrics.overdue} />
