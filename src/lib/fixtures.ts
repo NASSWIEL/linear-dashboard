@@ -1,4 +1,10 @@
-import type { Issue, Project } from "./types";
+import type {
+  Issue,
+  MetaResponse,
+  Project,
+  User,
+  WorkflowStateOption,
+} from "./types";
 
 // Deterministic dataset used when LINEAR_FIXTURES=1, so the dashboard can be
 // run and end-to-end tested offline without a Linear API key. Due dates are
@@ -28,8 +34,34 @@ const STATES = {
   canceled: { name: "Canceled", type: "canceled" as const, color: "#95a2b3" },
 };
 
-const NAIF = { name: "naif", displayName: "Naif Asswiel", avatarUrl: null };
+const FIXTURE_USERS: User[] = [
+  { id: "user-naif", name: "naif", displayName: "Naif Asswiel", avatarUrl: null },
+  { id: "user-sarah", name: "sarah", displayName: "Sarah Chen", avatarUrl: null },
+  { id: "user-bob", name: "bob", displayName: "Bob Martin", avatarUrl: null },
+];
+
+const FIXTURE_STATES: WorkflowStateOption[] = [
+  { id: "st-backlog", name: "Backlog", type: "backlog", color: "#bec2c8", position: 0 },
+  { id: "st-todo", name: "Todo", type: "unstarted", color: "#e2e2e2", position: 1 },
+  { id: "st-prog", name: "In Progress", type: "started", color: "#f2c94c", position: 2 },
+  { id: "st-review", name: "In Review", type: "started", color: "#5e6ad2", position: 3 },
+  { id: "st-done", name: "Done", type: "completed", color: "#4cb782", position: 4 },
+  { id: "st-cancel", name: "Canceled", type: "canceled", color: "#95a2b3", position: 5 },
+];
+
+export const FIXTURE_META: MetaResponse = {
+  users: FIXTURE_USERS,
+  states: FIXTURE_STATES,
+};
+
+const NAIF = {
+  id: "user-naif",
+  name: "naif",
+  displayName: "Naif Asswiel",
+  avatarUrl: null,
+};
 const BOB = {
+  id: "user-bob",
   name: "bob",
   displayName: "Bob Martin",
   // Inline SVG avatar so screenshots/tests don't depend on the network.
@@ -62,6 +94,7 @@ const P_COVEA = { id: "proj-covea", name: "COVEA - Suivi projet" };
 function issue(partial: Partial<Issue> & Pick<Issue, "identifier" | "title" | "state">): Issue {
   return {
     id: partial.identifier,
+    description: "",
     url: `https://linear.app/recast-test/issue/${partial.identifier}`,
     priority: 0,
     priorityLabel: "No priority",

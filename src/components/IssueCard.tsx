@@ -1,24 +1,37 @@
+"use client";
+
+import { useState } from "react";
 import type { Issue } from "@/lib/types";
-import { dueInfo, initials, priorityStyle } from "@/lib/format";
+import { dueInfo, priorityStyle } from "@/lib/format";
+import { useDashboard } from "./DashboardContext";
+import { StatusSelect } from "./StatusSelect";
+import { AssigneeSelect } from "./AssigneeSelect";
 
 export function IssueCard({ issue }: { issue: Issue }) {
+  const { busyIssueId, archiveIssue, editIssue } = useDashboard();
+  const [confirmArchive, setConfirmArchive] = useState(false);
   const prio = priorityStyle(issue.priorityLabel);
   const due = dueInfo(issue.dueDate);
   const isDone =
     issue.state.type === "completed" || issue.state.type === "canceled";
   const overdue = due !== null && due.daysDiff < 0 && !isDone;
+  const busy = busyIssueId === issue.id;
 
   return (
-    <a
-      href={issue.url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
+    <div
+      className={`rounded-lg border border-zinc-800 bg-zinc-900/60 p-3 transition-colors hover:border-zinc-700 ${
+        busy ? "opacity-60" : ""
+      }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="font-mono text-xs text-zinc-500">
+        <a
+          href={issue.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-mono text-xs text-zinc-500 hover:text-zinc-300"
+        >
           {issue.identifier}
-        </span>
+        </a>
         {issue.priorityLabel && issue.priorityLabel !== "No priority" && (
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${prio.badge}`}
@@ -29,9 +42,14 @@ export function IssueCard({ issue }: { issue: Issue }) {
         )}
       </div>
 
-      <p className="mt-1.5 line-clamp-2 text-sm font-medium text-zinc-100 group-hover:text-white">
+      <a
+        href={issue.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1.5 block line-clamp-2 text-sm font-medium text-zinc-100 hover:text-white"
+      >
         {issue.title}
-      </p>
+      </a>
 
       {issue.labels.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
@@ -50,48 +68,74 @@ export function IssueCard({ issue }: { issue: Issue }) {
         </div>
       )}
 
-      <div className="mt-3 flex items-center justify-between">
-        {isDone ? (
-          // Due date is moot once an issue is completed or canceled.
-          <span className="text-[11px] text-zinc-600">
-            {issue.state.type === "completed" ? "Completed" : "Canceled"}
-          </span>
-        ) : due ? (
-          <span
-            className={`text-[11px] font-medium ${
-              overdue ? "text-red-400" : "text-zinc-500"
-            }`}
-          >
-            {due.text}
-          </span>
-        ) : (
-          <span className="text-[11px] text-zinc-600">No due date</span>
-        )}
+      {/* Inline controls: status + reassign */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+        <StatusSelect issue={issue} />
+        <AssigneeSelect issue={issue} />
+      </div>
 
-        {issue.assignee ? (
-          issue.assignee.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={issue.assignee.avatarUrl}
-              alt={issue.assignee.displayName}
-              title={issue.assignee.displayName}
-              className="h-6 w-6 rounded-full ring-1 ring-zinc-700"
-            />
-          ) : (
-            <span
-              title={issue.assignee.displayName}
-              className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-[10px] font-semibold text-zinc-200 ring-1 ring-zinc-600"
+      <div className="mt-2.5 flex items-center justify-between">
+        <span
+          className={`text-[11px] font-medium ${
+            isDone
+              ? "text-zinc-600"
+              : overdue
+                ? "text-red-400"
+                : due
+                  ? "text-zinc-500"
+                  : "text-zinc-600"
+          }`}
+        >
+          {isDone
+            ? issue.state.type === "completed"
+              ? "Completed"
+              : "Canceled"
+            : due
+              ? due.text
+              : "No due date"}
+        </span>
+
+        {confirmArchive ? (
+          <span className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-zinc-400">Archive?</span>
+            <button
+              type="button"
+              disabled={busy}
+              aria-label={`Confirm archive ${issue.identifier}`}
+              onClick={() => archiveIssue(issue.id)}
+              className="rounded bg-red-600/80 px-1.5 py-0.5 font-medium text-white hover:bg-red-600"
             >
-              {initials(issue.assignee.displayName)}
-            </span>
-          )
+              Yes
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmArchive(false)}
+              className="rounded bg-zinc-700 px-1.5 py-0.5 text-zinc-200 hover:bg-zinc-600"
+            >
+              No
+            </button>
+          </span>
         ) : (
-          <span
-            title="Unassigned"
-            className="h-6 w-6 rounded-full border border-dashed border-zinc-700"
-          />
+          <span className="flex items-center gap-2 text-[11px]">
+            <button
+              type="button"
+              aria-label={`Edit ${issue.identifier}`}
+              onClick={() => editIssue(issue.id)}
+              className="text-zinc-400 hover:text-sky-300"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              aria-label={`Archive ${issue.identifier}`}
+              onClick={() => setConfirmArchive(true)}
+              className="text-zinc-400 hover:text-red-400"
+            >
+              Archive
+            </button>
+          </span>
         )}
       </div>
-    </a>
+    </div>
   );
 }

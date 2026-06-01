@@ -1,6 +1,13 @@
 import "server-only";
 
-import type { Issue, Project } from "./types";
+import type {
+  CreateIssueInput,
+  Issue,
+  Project,
+  UpdateIssueInput,
+  User,
+  WorkflowStateOption,
+} from "./types";
 
 const LINEAR_URL = "https://api.linear.app/graphql";
 
@@ -66,6 +73,7 @@ const ISSUES_QUERY = /* GraphQL */ `
         id
         identifier
         title
+        description
         priority
         priorityLabel
         dueDate
@@ -79,6 +87,7 @@ const ISSUES_QUERY = /* GraphQL */ `
           color
         }
         assignee {
+          id
           name
           displayName
           avatarUrl
@@ -158,4 +167,148 @@ interface ProjectsPage {
 export async function fetchProjects(): Promise<Project[]> {
   const data = await linearQuery<ProjectsPage>(PROJECTS_QUERY, { first: 250 });
   return [...data.projects.nodes].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// ---------------------------------------------------------------------------
+// Write layer (mutations) + dropdown metadata (users, workflow states)
+// ---------------------------------------------------------------------------
+
+// Shared issue selection so mutations return the same shape mapIssue expects.
+const ISSUE_FIELDS = /* GraphQL */ `
+  id
+  identifier
+  title
+  description
+  priority
+  priorityLabel
+  dueDate
+  updatedAt
+  url
+  completedAt
+  canceledAt
+  state { name type color }
+  assignee { id name displayName avatarUrl }
+  project { id name }
+  labels { nodes { name color } }
+`;
+
+let cachedTeamId: string | null = null;
+
+async function getTeamId(): Promise<string> {
+  if (cachedTeamId) return cachedTeamId;
+  const data = await linearQuery<{
+    teams: { nodes: { id: string }[] };
+  }>(
+    `query TeamId($key:String!){ teams(filter:{ key:{ eq:$key } }){ nodes { id } } }`,
+    { key: teamKey() },
+  );
+  const id = data.teams.nodes[0]?.id;
+  if (!id) throw new Error(`Team ${teamKey()} not found.`);
+  cachedTeamId = id;
+  return id;
+}
+
+export async function fetchUsers(): Promise<User[]> {
+  const data = await linearQuery<{
+    users: {
+      nodes: {
+        id: string;
+        name: string;
+        displayName: string;
+        avatarUrl: string | null;
+        active: boolean;
+        email: string;
+      }[];
+    };
+  }>(
+    `query Users($first:Int!){ users(first:$first){ nodes { id name displayName avatarUrl active email } } }`,
+    { first: 250 },
+  );
+  return data.users.nodes
+    // Exclude inactive users and the Linear app/bot (not assignable here).
+    .filter((u) => u.active && !u.email.endsWith("@linear.linear.app"))
+    .map((u) => ({
+      id: u.id,
+      name: u.name,
+      displayName: u.displayName,
+      avatarUrl: u.avatarUrl ?? null,
+    }))
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
+export async function fetchStates(): Promise<WorkflowStateOption[]> {
+  const data = await linearQuery<{
+    teams: {
+      nodes: {
+        states: { nodes: WorkflowStateOption[] };
+      }[];
+    };
+  }>(
+    `query States($key:String!){
+      teams(filter:{ key:{ eq:$key } }){
+        nodes { states { nodes { id name type color position } } }
+      }
+    }`,
+    { key: teamKey() },
+  );
+  const states = data.teams.nodes[0]?.states.nodes ?? [];
+  return [...states].sort((a, b) => a.position - b.position);
+}
+
+export async function createIssue(input: CreateIssueInput): Promise<Issue> {
+  const teamId = await getTeamId();
+  const data = await linearQuery<{
+    issueCreate: { success: boolean; issue: RawIssue };
+  }>(
+    `mutation Create($input: IssueCreateInput!){
+      issueCreate(input:$input){ success issue { ${ISSUE_FIELDS} } }
+    }`,
+    {
+      input: {
+        teamId,
+        title: input.title,
+        description: input.description,
+        projectId: input.projectId || undefined,
+        stateId: input.stateId || undefined,
+        assigneeId: input.assigneeId || undefined,
+        priority: input.priority,
+        dueDate: input.dueDate || undefined,
+      },
+    },
+  );
+  if (!data.issueCreate.success) throw new Error("Linear issueCreate failed.");
+  return mapIssue(data.issueCreate.issue);
+}
+
+export async function updateIssue(
+  id: string,
+  input: UpdateIssueInput,
+): Promise<Issue> {
+  // Build the update payload, allowing explicit null to unassign / clear due date.
+  const payload: Record<string, unknown> = {};
+  if (input.title !== undefined) payload.title = input.title;
+  if (input.description !== undefined) payload.description = input.description;
+  if (input.stateId !== undefined) payload.stateId = input.stateId;
+  if (input.assigneeId !== undefined) payload.assigneeId = input.assigneeId;
+  if (input.priority !== undefined) payload.priority = input.priority;
+  if (input.dueDate !== undefined) payload.dueDate = input.dueDate;
+
+  const data = await linearQuery<{
+    issueUpdate: { success: boolean; issue: RawIssue };
+  }>(
+    `mutation Update($id:String!, $input: IssueUpdateInput!){
+      issueUpdate(id:$id, input:$input){ success issue { ${ISSUE_FIELDS} } }
+    }`,
+    { id, input: payload },
+  );
+  if (!data.issueUpdate.success) throw new Error("Linear issueUpdate failed.");
+  return mapIssue(data.issueUpdate.issue);
+}
+
+export async function archiveIssue(id: string): Promise<boolean> {
+  const data = await linearQuery<{ issueArchive: { success: boolean } }>(
+    `mutation Archive($id:String!){ issueArchive(id:$id){ success } }`,
+    { id },
+  );
+  return data.issueArchive.success;
 }

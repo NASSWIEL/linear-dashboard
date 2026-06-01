@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { Issue, IssueState, WorkflowStateType } from "./types";
-import { deriveMetrics, filterByProject, isOverdue, todayYMD } from "./metrics";
+import {
+  deriveMetrics,
+  filterByMetric,
+  filterByProject,
+  isOverdue,
+  todayYMD,
+} from "./metrics";
 import { fixtureIssues } from "./fixtures";
 
 const STATE: Record<string, IssueState> = {
@@ -16,6 +22,7 @@ function mk(overrides: Partial<Issue> & { identifier: string }): Issue {
   return {
     id: overrides.identifier,
     title: "Issue",
+    description: null,
     priority: 0,
     priorityLabel: "No priority",
     dueDate: null,
@@ -174,6 +181,56 @@ describe("filterByProject", () => {
 
   it("returns empty for a project with no issues", () => {
     expect(filterByProject(issues, "nope")).toEqual([]);
+  });
+});
+
+describe("filterByMetric", () => {
+  const issues = [
+    mk({ identifier: "1", state: STATE.started }),
+    mk({ identifier: "2", state: STATE.review }), // started type
+    mk({ identifier: "3", state: STATE.todo }),
+    mk({ identifier: "4", state: STATE.backlog }),
+    mk({ identifier: "5", state: STATE.done }),
+    mk({
+      identifier: "6",
+      state: STATE.started,
+      dueDate: "2026-05-01", // overdue vs TODAY
+    }),
+    mk({
+      identifier: "7",
+      state: STATE.todo,
+      assignee: {
+        id: "u1",
+        name: "x",
+        displayName: "X",
+        avatarUrl: null,
+      },
+    }),
+  ];
+
+  it("returns everything for 'all'", () => {
+    expect(filterByMetric(issues, "all", TODAY)).toHaveLength(7);
+  });
+
+  it("filters in-progress (started type incl. In Review)", () => {
+    const r = filterByMetric(issues, "in-progress", TODAY).map((i) => i.identifier);
+    expect(r.sort()).toEqual(["1", "2", "6"]);
+  });
+
+  it("filters overdue", () => {
+    expect(filterByMetric(issues, "overdue", TODAY).map((i) => i.identifier)).toEqual(["6"]);
+  });
+
+  it("filters done / todo / backlog", () => {
+    expect(filterByMetric(issues, "done", TODAY).map((i) => i.identifier)).toEqual(["5"]);
+    expect(filterByMetric(issues, "todo", TODAY).map((i) => i.identifier).sort()).toEqual(["3", "7"]);
+    expect(filterByMetric(issues, "backlog", TODAY).map((i) => i.identifier)).toEqual(["4"]);
+  });
+
+  it("filters unassigned (excludes the one with an assignee)", () => {
+    const r = filterByMetric(issues, "unassigned", TODAY).map((i) => i.identifier);
+    expect(r).not.toContain("7");
+    expect(r).toHaveLength(6);
   });
 });
 

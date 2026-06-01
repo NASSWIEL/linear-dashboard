@@ -13,6 +13,7 @@ export interface IssueState {
 }
 
 export interface IssueAssignee {
+  id: string;
   name: string;
   displayName: string;
   avatarUrl: string | null;
@@ -32,6 +33,7 @@ export interface Issue {
   id: string;
   identifier: string;
   title: string;
+  description: string | null;
   priority: number; // 0 = No priority, 1 = Urgent, 2 = High, 3 = Medium, 4 = Low
   priorityLabel: string;
   dueDate: string | null; // TimelessDate "YYYY-MM-DD"
@@ -87,3 +89,52 @@ export interface IssuesResponse {
 export interface ProjectsResponse {
   projects: Project[];
 }
+
+export interface User {
+  id: string;
+  name: string;
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface WorkflowStateOption {
+  id: string;
+  name: string;
+  type: WorkflowStateType;
+  color: string;
+  position: number;
+}
+
+export interface MetaResponse {
+  users: User[];
+  states: WorkflowStateOption[];
+}
+
+export interface CreateIssueInput {
+  title: string;
+  description?: string;
+  projectId?: string | null;
+  stateId?: string | null;
+  assigneeId?: string | null;
+  priority?: number;
+  dueDate?: string | null;
+}
+
+export interface UpdateIssueInput {
+  title?: string;
+  description?: string;
+  stateId?: string;
+  assigneeId?: string | null;
+  priority?: number;
+  dueDate?: string | null;
+}
+
+// KPI-card click filters applied to the board (not the overview metrics).
+export type MetricFilter =
+  | "all"
+  | "overdue"
+  | "in-progress"
+  | "done"
+  | "todo"
+  | "backlog"
+  | "unassigned";

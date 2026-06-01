@@ -1,5 +1,6 @@
 import type {
   Issue,
+  MetricFilter,
   Metrics,
   PriorityBucket,
   StateColumn,
@@ -115,4 +116,31 @@ export function filterByProject(
 ): Issue[] {
   if (!projectId || projectId === "all") return issues;
   return issues.filter((i) => i.project?.id === projectId);
+}
+
+/** Narrow the board to a KPI-card selection (clicking "Overdue", etc.). */
+export function filterByMetric(
+  issues: Issue[],
+  filter: MetricFilter,
+  today: string = todayYMD(),
+): Issue[] {
+  switch (filter) {
+    case "overdue":
+      return issues.filter((i) => isOverdue(i, today));
+    case "in-progress":
+      return issues.filter((i) => i.state.type === "started");
+    case "done":
+      return issues.filter((i) => i.state.type === "completed");
+    case "todo":
+      return issues.filter((i) => i.state.type === "unstarted");
+    case "backlog":
+      return issues.filter(
+        (i) => i.state.type === "backlog" || i.state.type === "triage",
+      );
+    case "unassigned":
+      return issues.filter((i) => !i.assignee);
+    case "all":
+    default:
+      return issues;
+  }
 }
