@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Suivi Projets : BT-IA · CGI",
-  description: "Suivi des projets IA — CGI, Unité AT.",
+  description: "Suivi des projets IA — CGI, BT-IA.",
 };
 
 export default function RootLayout({

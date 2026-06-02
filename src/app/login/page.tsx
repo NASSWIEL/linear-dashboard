@@ -15,7 +15,7 @@ export default function LoginPage() {
         <h1 className="mb-0.5 text-base font-semibold text-fg">
           Suivi Projets : BT-IA
         </h1>
-        <p className="mb-8 text-sm text-muted">CGI · Unité AT</p>
+        <p className="mb-8 text-sm text-muted">CGI · BT-IA</p>
 
         <form
           action={async () => {
