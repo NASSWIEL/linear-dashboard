@@ -366,8 +366,8 @@ export function Dashboard() {
                   onSelect={(f) => setParam("filter", f)}
                 />
 
-                <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1fr_320px]">
-                  <div className="min-w-0">
+                <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="min-w-0 overflow-hidden">
                     <div className="mb-3 flex items-center gap-2">
                       <h2 className="text-sm font-semibold text-muted">
                         Tableau
