@@ -366,8 +366,8 @@ export function Dashboard() {
                   onSelect={(f) => setParam("filter", f)}
                 />
 
-                <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-                  <div className="min-w-0 overflow-hidden">
+                <div className="space-y-5">
+                  <div className="min-w-0">
                     <div className="mb-3 flex items-center gap-2">
                       <h2 className="text-sm font-semibold text-muted">
                         Tableau
@@ -385,7 +385,7 @@ export function Dashboard() {
                     <KanbanBoard issues={boardIssues} columns={boardColumns} />
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                     <StatusChart columns={metrics.columns} total={metrics.total} />
                     <PriorityBreakdown buckets={metrics.byPriority} />
                     <OverduePanel issues={metrics.overdue} />
