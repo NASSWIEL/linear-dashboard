@@ -149,26 +149,36 @@ export async function fetchAllIssues(): Promise<Issue[]> {
   return all;
 }
 
+// Scoped to the current team — issues are team-filtered, so a workspace-wide
+// project list would surface other teams' projects (count 0, empty on click).
 const PROJECTS_QUERY = /* GraphQL */ `
-  query DashboardProjects($first: Int!) {
-    projects(first: $first) {
+  query DashboardProjects($key: String!, $first: Int!) {
+    teams(filter: { key: { eq: $key } }) {
       nodes {
-        id
-        name
-        color
-        state
+        projects(first: $first) {
+          nodes {
+            id
+            name
+            color
+            state
+          }
+        }
       }
     }
   }
 `;
 
 interface ProjectsPage {
-  projects: { nodes: Project[] };
+  teams: { nodes: { projects: { nodes: Project[] } }[] };
 }
 
 export async function fetchProjects(): Promise<Project[]> {
-  const data = await linearQuery<ProjectsPage>(PROJECTS_QUERY, { first: 250 });
-  return [...data.projects.nodes].sort((a, b) => a.name.localeCompare(b.name));
+  const data = await linearQuery<ProjectsPage>(PROJECTS_QUERY, {
+    key: teamKey(),
+    first: 250,
+  });
+  const nodes = data.teams.nodes[0]?.projects.nodes ?? [];
+  return [...nodes].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ---------------------------------------------------------------------------
