@@ -10,6 +10,7 @@ import { AssigneeSelect } from "./AssigneeSelect";
 export function IssueCard({ issue }: { issue: Issue }) {
   const { busyIssueId, archiveIssue, editIssue } = useDashboard();
   const [confirmArchive, setConfirmArchive] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const prio = priorityStyle(issue.priorityLabel);
   const due = dueInfo(issue.dueDate);
   const isDone =
@@ -19,19 +20,22 @@ export function IssueCard({ issue }: { issue: Issue }) {
 
   return (
     <div
-      className={`rounded-lg border border-border bg-surface/60 p-3 transition-colors hover:border-border ${
+      role="button"
+      tabIndex={0}
+      aria-expanded={expanded}
+      onClick={() => setExpanded((v) => !v)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setExpanded((v) => !v);
+        }
+      }}
+      className={`cursor-pointer rounded-lg border border-border bg-surface/60 p-3 transition-colors hover:border-border ${
         busy ? "opacity-60" : ""
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <a
-          href={issue.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-mono text-xs text-muted hover:text-muted"
-        >
-          {issue.identifier}
-        </a>
+        <span className="font-mono text-xs text-muted">{issue.identifier}</span>
         {issue.priorityLabel && issue.priorityLabel !== "No priority" && (
           <span
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${prio.badge}`}
@@ -42,14 +46,25 @@ export function IssueCard({ issue }: { issue: Issue }) {
         )}
       </div>
 
-      <a
-        href={issue.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-1.5 block line-clamp-2 text-sm font-medium text-fg hover:text-fg"
+      <p
+        className={`mt-1.5 text-sm font-medium text-fg ${
+          expanded ? "" : "line-clamp-2"
+        }`}
       >
         {issue.title}
-      </a>
+      </p>
+
+      {expanded && (
+        <div className="mt-2 border-t border-border pt-2">
+          {issue.description?.trim() ? (
+            <p className="whitespace-pre-wrap text-xs text-muted">
+              {issue.description}
+            </p>
+          ) : (
+            <p className="text-xs italic text-faint">Aucune description</p>
+          )}
+        </div>
+      )}
 
       {issue.labels.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1">
@@ -69,12 +84,18 @@ export function IssueCard({ issue }: { issue: Issue }) {
       )}
 
       {/* Inline controls: status + reassign */}
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="mt-2.5 flex flex-wrap items-center gap-1.5"
+      >
         <StatusSelect issue={issue} />
         <AssigneeSelect issue={issue} />
       </div>
 
-      <div className="mt-2.5 flex items-center justify-between">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="mt-2.5 flex items-center justify-between"
+      >
         <span
           className={`text-[11px] font-medium ${
             isDone
