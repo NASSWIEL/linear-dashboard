@@ -12,6 +12,7 @@ export function Sidebar({
   onArchiveProject,
   totalCount,
   countFor,
+  noProjectCount,
   members,
   selectedAssignee,
   onSelectAssignee,
@@ -24,6 +25,7 @@ export function Sidebar({
   onArchiveProject: (id: string) => void;
   totalCount: number;
   countFor: (projectId: string) => number;
+  noProjectCount: number;
   members: User[];
   selectedAssignee: string;
   onSelectAssignee: (key: string) => void;
@@ -84,6 +86,17 @@ export function Sidebar({
 
         {projects.length === 0 && (
           <p className="px-2 py-2 text-xs text-faint">Aucun projet trouvé.</p>
+        )}
+
+        {noProjectCount > 0 && (
+          <ProjectItem
+            active={selectedId === "none"}
+            onClick={() => onSelect("none")}
+            dotColor="#71717a"
+            label="Sans projet"
+            count={noProjectCount}
+            onArchive={null}
+          />
         )}
 
         <p className="px-2 pb-1.5 pt-4 text-[11px] font-semibold uppercase tracking-wider text-faint">

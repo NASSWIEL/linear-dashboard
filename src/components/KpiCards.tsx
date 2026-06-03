@@ -5,7 +5,6 @@ import type { MetricFilter, Metrics } from "@/lib/types";
 interface Kpi {
   label: string;
   value: number | string;
-  hint?: string;
   accent: string;
   ring: string;
   filter: MetricFilter;
@@ -24,7 +23,6 @@ export function KpiCards({
     {
       label: "Total",
       value: metrics.total,
-      hint: "tous les statuts",
       accent: "text-fg",
       ring: "ring-border/40",
       filter: "all",
@@ -32,7 +30,6 @@ export function KpiCards({
     {
       label: "Backlog",
       value: metrics.backlog,
-      hint: "non démarré",
       accent: "text-muted",
       ring: "ring-border/40",
       filter: "backlog",
@@ -40,7 +37,6 @@ export function KpiCards({
     {
       label: "À faire",
       value: metrics.todo,
-      hint: "prêt à démarrer",
       accent: "text-indigo-700 dark:text-indigo-300",
       ring: "ring-indigo-500/30",
       filter: "todo",
@@ -48,7 +44,6 @@ export function KpiCards({
     {
       label: "En cours",
       value: metrics.inProgress,
-      hint: "en cours de traitement",
       accent: "text-sky-700 dark:text-sky-300",
       ring: "ring-sky-500/30",
       filter: "in-progress",
@@ -56,7 +51,6 @@ export function KpiCards({
     {
       label: "En retard",
       value: metrics.overdueCount,
-      hint: metrics.overdueCount > 0 ? "à traiter" : "tout est à jour",
       accent: metrics.overdueCount > 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400",
       ring: metrics.overdueCount > 0 ? "ring-red-500/30" : "ring-emerald-500/30",
       filter: "overdue",
@@ -64,7 +58,6 @@ export function KpiCards({
     {
       label: "Terminé",
       value: metrics.completed,
-      hint: `${metrics.completionRate}% complété`,
       accent: "text-emerald-700 dark:text-emerald-300",
       ring: "ring-emerald-500/30",
       filter: "done",
@@ -93,7 +86,6 @@ export function KpiCards({
             <p className={`mt-1 text-3xl font-semibold tabular-nums ${kpi.accent}`}>
               {kpi.value}
             </p>
-            {kpi.hint && <p className="mt-1 text-xs text-muted">{kpi.hint}</p>}
             {active && (
               <p className="mt-1 text-[10px] font-medium text-sky-700 dark:text-sky-400">
                 Filtré · cliquer pour effacer

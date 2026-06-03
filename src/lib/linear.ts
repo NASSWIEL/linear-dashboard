@@ -376,6 +376,144 @@ export async function archiveProject(id: string): Promise<boolean> {
   return data.projectArchive.success;
 }
 
+// --- Repo -> Project mapping ----------------------------------------------
+// Linear's native GitHub sync maps a repo to a *team*, never to a *project*.
+// We fill that gap: when an issue carries a GitHub attachment, ensure a Linear
+// project named after the repo exists and the issue is assigned to it.
+
+/** Extract the repo name from a GitHub issue/PR URL. Returns null if not GitHub. */
+export function parseGitHubRepo(
+  url: string,
+): { owner: string; repo: string } | null {
+  const m = url.match(/github\.com\/([^/]+)\/([^/]+)/i);
+  if (!m) return null;
+  const owner = m[1];
+  const repo = m[2].replace(/\.git$/, "");
+  if (!owner || !repo) return null;
+  return { owner, repo };
+}
+
+interface IssueRepoContext {
+  id: string;
+  identifier: string;
+  projectId: string | null;
+  attachmentUrls: string[];
+}
+
+async function fetchIssueRepoContext(
+  issueId: string,
+): Promise<IssueRepoContext | null> {
+  const data = await linearQuery<{
+    issue: {
+      id: string;
+      identifier: string;
+      project: { id: string } | null;
+      attachments: { nodes: { url: string }[] };
+    } | null;
+  }>(
+    `query IssueRepoCtx($id:String!){
+      issue(id:$id){
+        id
+        identifier
+        project { id }
+        attachments { nodes { url } }
+      }
+    }`,
+    { id: issueId },
+  );
+  const issue = data.issue;
+  if (!issue) return null;
+  return {
+    id: issue.id,
+    identifier: issue.identifier,
+    projectId: issue.project?.id ?? null,
+    attachmentUrls: issue.attachments.nodes.map((n) => n.url),
+  };
+}
+
+async function findProjectByName(name: string): Promise<Project | null> {
+  const projects = await fetchProjects();
+  const target = name.toLowerCase();
+  return projects.find((p) => p.name.toLowerCase() === target) ?? null;
+}
+
+async function setIssueProject(
+  issueId: string,
+  projectId: string,
+): Promise<void> {
+  const data = await linearQuery<{ issueUpdate: { success: boolean } }>(
+    `mutation SetIssueProject($id:String!, $input: IssueUpdateInput!){
+      issueUpdate(id:$id, input:$input){ success }
+    }`,
+    { id: issueId, input: { projectId } },
+  );
+  if (!data.issueUpdate.success)
+    throw new Error("Linear issueUpdate (projectId) failed.");
+}
+
+export type RepoLinkResult =
+  | { status: "skipped"; reason: string; identifier?: string }
+  | {
+      status: "linked";
+      identifier: string;
+      repo: string;
+      projectName: string;
+      projectCreated: boolean;
+    };
+
+/**
+ * Ensure an issue is attached to a Linear project named after its GitHub repo.
+ * Idempotent: an issue that already has a project is left untouched, and an
+ * existing project of the same name is reused (never duplicated).
+ */
+export async function linkIssueToRepoProject(
+  issueId: string,
+): Promise<RepoLinkResult> {
+  const ctx = await fetchIssueRepoContext(issueId);
+  if (!ctx) return { status: "skipped", reason: "issue introuvable" };
+  if (ctx.projectId)
+    return {
+      status: "skipped",
+      reason: "issue a déjà un projet",
+      identifier: ctx.identifier,
+    };
+
+  let repoName: string | null = null;
+  for (const url of ctx.attachmentUrls) {
+    const parsed = parseGitHubRepo(url);
+    if (parsed) {
+      repoName = parsed.repo;
+      break;
+    }
+  }
+  if (!repoName)
+    return {
+      status: "skipped",
+      reason: "aucune pièce jointe GitHub",
+      identifier: ctx.identifier,
+    };
+
+  const existing = await findProjectByName(repoName);
+  let projectId: string;
+  let projectCreated = false;
+  if (existing) {
+    projectId = existing.id;
+  } else {
+    const created = await createProject({ name: repoName });
+    projectId = created.id;
+    projectCreated = true;
+  }
+
+  await setIssueProject(ctx.id, projectId);
+  return {
+    status: "linked",
+    identifier: ctx.identifier,
+    repo: repoName,
+    projectName: repoName,
+    projectCreated,
+  };
+}
+
 // --- Project members -------------------------------------------------------
 // Linear has no add/remove member mutation; membership is the full memberIds
 // array on projectUpdate. So we read the current set and write the change.

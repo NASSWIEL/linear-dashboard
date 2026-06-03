@@ -109,12 +109,17 @@ export function deriveMetrics(
   };
 }
 
-/** Filter to a single project, or return all when projectId is null/"all". */
+/**
+ * Filter to a single project, or return all when projectId is null/"all".
+ * The special id "none" matches issues with no Linear project (orphans, e.g.
+ * created from a GitHub repo without being assigned to a project).
+ */
 export function filterByProject(
   issues: Issue[],
   projectId: string | null,
 ): Issue[] {
   if (!projectId || projectId === "all") return issues;
+  if (projectId === "none") return issues.filter((i) => !i.project);
   return issues.filter((i) => i.project?.id === projectId);
 }
 

@@ -120,6 +120,11 @@ export function Dashboard() {
   const countFor = (projectId: string) =>
     allIssues.filter((i) => i.project?.id === projectId).length;
 
+  // Issues with no Linear project (e.g. created from a GitHub repo, never
+  // attached to a project). Surfaced as a "Sans projet" bucket so they remain
+  // findable instead of vanishing into "Tous les projets".
+  const noProjectCount = allIssues.filter((i) => !i.project).length;
+
   // People counts reflect the current project scope.
   const members = metaData?.users ?? [];
   const countByAssignee = (key: string) => {
@@ -138,7 +143,9 @@ export function Dashboard() {
   const selectedProjectName =
     selectedId === "all"
       ? "Tous les projets"
-      : (projects.find((p) => p.id === selectedId)?.name ?? "Projet");
+      : selectedId === "none"
+        ? "Sans projet"
+        : (projects.find((p) => p.id === selectedId)?.name ?? "Projet");
 
   function setParam(key: string, value: string | null) {
     const params = new URLSearchParams(searchParams.toString());
@@ -251,6 +258,7 @@ export function Dashboard() {
           onArchiveProject={ctxArchiveProject}
           totalCount={allIssues.length}
           countFor={countFor}
+          noProjectCount={noProjectCount}
           members={members}
           selectedAssignee={assignee}
           onSelectAssignee={(key) => setParam("assignee", key)}
