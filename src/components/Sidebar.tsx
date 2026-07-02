@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import type { Project, User } from "@/lib/types";
+import type { Project, Team, User } from "@/lib/types";
 import { initials } from "@/lib/format";
 
 export function Sidebar({
+  teams,
+  selectedTeam,
+  onSelectTeam,
+  countByTeam,
   projects,
   selectedId,
   onSelect,
@@ -18,6 +22,10 @@ export function Sidebar({
   onSelectAssignee,
   countByAssignee,
 }: {
+  teams: Team[];
+  selectedTeam: string;
+  onSelectTeam: (key: string) => void;
+  countByTeam: (key: string) => number;
   projects: Project[];
   selectedId: string;
   onSelect: (id: string) => void;
@@ -49,6 +57,34 @@ export function Sidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-2">
+        {teams.length > 0 && (
+          <>
+            <p className="px-2 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-faint">
+              Équipes
+            </p>
+            <ProjectItem
+              active={selectedTeam === "all"}
+              onClick={() => onSelectTeam("all")}
+              dotColor="#a1a1aa"
+              label="Toutes les équipes"
+              count={countByTeam("all")}
+              onArchive={null}
+            />
+            {teams.map((t) => (
+              <ProjectItem
+                key={t.id}
+                active={selectedTeam === t.key}
+                onClick={() => onSelectTeam(t.key)}
+                dotColor="#6366f1"
+                label={t.name}
+                count={countByTeam(t.key)}
+                onArchive={null}
+              />
+            ))}
+            <div className="h-3" />
+          </>
+        )}
+
         <div className="flex items-center justify-between px-2 pb-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-faint">
             Projets

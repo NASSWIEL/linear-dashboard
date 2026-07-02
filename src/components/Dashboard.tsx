@@ -11,6 +11,7 @@ import type {
   MetaResponse,
   MetricFilter,
   ProjectsResponse,
+  TeamsResponse,
   UpdateIssueInput,
 } from "@/lib/types";
 import {
@@ -18,6 +19,7 @@ import {
   filterByAssignee,
   filterByMetric,
   filterByProject,
+  filterByTeam,
 } from "@/lib/metrics";
 import { relativeTime } from "@/lib/format";
 import { DashboardProvider } from "./DashboardContext";
@@ -62,6 +64,7 @@ export function Dashboard() {
   const selectedId = searchParams.get("project") ?? "all";
   const filter = (searchParams.get("filter") as MetricFilter) ?? "all";
   const assignee = searchParams.get("assignee") ?? "all";
+  const team = searchParams.get("team") ?? "all";
 
   const {
     data: issuesData,
@@ -84,6 +87,10 @@ export function Dashboard() {
     revalidateOnFocus: false,
   });
 
+  const { data: teamsData } = useSWR<TeamsResponse>("/api/teams", fetcher, {
+    revalidateOnFocus: false,
+  });
+
   const { data: session } = useSession();
 
   const [busyIssueId, setBusyIssueId] = useState<string | null>(null);
@@ -94,12 +101,26 @@ export function Dashboard() {
   const [assignProjectOpen, setAssignProjectOpen] = useState(false);
 
   const allIssues = useMemo(() => issuesData?.issues ?? [], [issuesData]);
-  const projects = projectsData?.projects ?? [];
+  const allProjects = projectsData?.projects ?? [];
+  const teams = teamsData?.teams ?? [];
 
-  // Scope = project, then assignee. Overview metrics + charts reflect the scope.
+  // Scope = team, then project, then assignee. Metrics + charts reflect the scope.
+  const teamIssues = useMemo(
+    () => filterByTeam(allIssues, team),
+    [allIssues, team],
+  );
+  // Project list is scoped to the selected team so it never shows other teams'
+  // projects (which would read as empty when clicked).
+  const projects = useMemo(
+    () =>
+      team === "all"
+        ? allProjects
+        : allProjects.filter((p) => p.teamKey === team),
+    [allProjects, team],
+  );
   const projectIssues = useMemo(
-    () => filterByProject(allIssues, selectedId),
-    [allIssues, selectedId],
+    () => filterByProject(teamIssues, selectedId),
+    [teamIssues, selectedId],
   );
   const scopedIssues = useMemo(
     () => filterByAssignee(projectIssues, assignee),
@@ -118,12 +139,17 @@ export function Dashboard() {
   );
 
   const countFor = (projectId: string) =>
-    allIssues.filter((i) => i.project?.id === projectId).length;
+    teamIssues.filter((i) => i.project?.id === projectId).length;
+
+  const countByTeam = (key: string) =>
+    key === "all"
+      ? allIssues.length
+      : allIssues.filter((i) => i.team?.key === key).length;
 
   // Issues with no Linear project (e.g. created from a GitHub repo, never
   // attached to a project). Surfaced as a "Sans projet" bucket so they remain
   // findable instead of vanishing into "Tous les projets".
-  const noProjectCount = allIssues.filter((i) => !i.project).length;
+  const noProjectCount = teamIssues.filter((i) => !i.project).length;
 
   // People counts reflect the current project scope.
   const members = metaData?.users ?? [];
@@ -151,6 +177,15 @@ export function Dashboard() {
     const params = new URLSearchParams(searchParams.toString());
     if (!value || value === "all") params.delete(key);
     else params.set(key, value);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  // Switching team resets the narrower scopes (project/assignee/filter), since
+  // those ids belong to the previous team and would otherwise show nothing.
+  function selectTeam(key: string) {
+    const params = new URLSearchParams();
+    if (key && key !== "all") params.set("team", key);
     const query = params.toString();
     router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
@@ -226,7 +261,9 @@ export function Dashboard() {
 
   // Modal actions: throw so the modal shows the error.
   const modalCreate = async (input: CreateIssueInput) => {
-    await apiCreate(input);
+    // Route the new issue to the currently selected team (defaults to backend's
+    // first team when "Toutes les équipes" is active).
+    await apiCreate(team !== "all" ? { ...input, teamKey: team } : input);
     await mutate();
   };
   const modalUpdate = async (id: string, input: UpdateIssueInput) => {
@@ -251,12 +288,16 @@ export function Dashboard() {
     >
       <div className="flex min-h-screen w-full bg-bg text-fg">
         <Sidebar
+          teams={teams}
+          selectedTeam={team}
+          onSelectTeam={selectTeam}
+          countByTeam={countByTeam}
           projects={projects}
           selectedId={selectedId}
           onSelect={(id) => setParam("project", id)}
           onAddProject={() => setAddProjectOpen(true)}
           onArchiveProject={ctxArchiveProject}
-          totalCount={allIssues.length}
+          totalCount={teamIssues.length}
           countFor={countFor}
           noProjectCount={noProjectCount}
           members={members}

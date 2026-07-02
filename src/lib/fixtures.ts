@@ -2,6 +2,7 @@ import type {
   Issue,
   MetaResponse,
   Project,
+  Team,
   User,
   WorkflowStateOption,
 } from "./types";
@@ -54,6 +55,10 @@ export const FIXTURE_META: MetaResponse = {
   states: FIXTURE_STATES,
 };
 
+const T_REC = { id: "team-rec", key: "REC", name: "Recast-test" };
+
+export const FIXTURE_TEAMS: Team[] = [T_REC];
+
 const NAIF = {
   id: "user-naif",
   name: "naif",
@@ -104,6 +109,7 @@ function issue(partial: Partial<Issue> & Pick<Issue, "identifier" | "title" | "s
     canceledAt: null,
     assignee: null,
     project: null,
+    team: T_REC,
     labels: [],
     ...partial,
   };

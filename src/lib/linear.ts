@@ -6,6 +6,7 @@ import type {
   Issue,
   Project,
   ProjectMembership,
+  Team,
   UpdateIssueInput,
   User,
   WorkflowStateOption,
@@ -61,12 +62,8 @@ async function linearQuery<T>(
 }
 
 const ISSUES_QUERY = /* GraphQL */ `
-  query DashboardIssues($teamKey: String!, $first: Int!, $after: String) {
-    issues(
-      first: $first
-      after: $after
-      filter: { team: { key: { eq: $teamKey } } }
-    ) {
+  query DashboardIssues($first: Int!, $after: String) {
+    issues(first: $first, after: $after) {
       pageInfo {
         hasNextPage
         endCursor
@@ -96,6 +93,11 @@ const ISSUES_QUERY = /* GraphQL */ `
         }
         project {
           id
+          name
+        }
+        team {
+          id
+          key
           name
         }
         labels {
@@ -134,7 +136,6 @@ export async function fetchAllIssues(): Promise<Issue[]> {
   // Linear caps a single page at 250 nodes; paginate to be safe.
   do {
     const data: IssuesPage = await linearQuery<IssuesPage>(ISSUES_QUERY, {
-      teamKey: teamKey(),
       first: 250,
       after,
     });
@@ -149,12 +150,13 @@ export async function fetchAllIssues(): Promise<Issue[]> {
   return all;
 }
 
-// Scoped to the current team — issues are team-filtered, so a workspace-wide
-// project list would surface other teams' projects (count 0, empty on click).
+// Workspace-wide: every team's projects, each tagged with its team key so the
+// sidebar can scope the project list to the selected team.
 const PROJECTS_QUERY = /* GraphQL */ `
-  query DashboardProjects($key: String!, $first: Int!) {
-    teams(filter: { key: { eq: $key } }) {
+  query DashboardProjects($first: Int!) {
+    teams {
       nodes {
+        key
         projects(first: $first) {
           nodes {
             id
@@ -169,16 +171,35 @@ const PROJECTS_QUERY = /* GraphQL */ `
 `;
 
 interface ProjectsPage {
-  teams: { nodes: { projects: { nodes: Project[] } }[] };
+  teams: {
+    nodes: {
+      key: string;
+      projects: { nodes: Omit<Project, "teamKey">[] };
+    }[];
+  };
 }
 
 export async function fetchProjects(): Promise<Project[]> {
-  const data = await linearQuery<ProjectsPage>(PROJECTS_QUERY, {
-    key: teamKey(),
-    first: 250,
-  });
-  const nodes = data.teams.nodes[0]?.projects.nodes ?? [];
-  return [...nodes].sort((a, b) => a.name.localeCompare(b.name));
+  // Linear caps query complexity at 10000; first:250 here exceeds it (~17.5k).
+  // A team has few projects, so 50 is ample and keeps the query under budget.
+  const data = await linearQuery<ProjectsPage>(PROJECTS_QUERY, { first: 50 });
+  // A project can belong to several teams; dedupe by id (first team wins).
+  const byId = new Map<string, Project>();
+  for (const team of data.teams.nodes) {
+    for (const p of team.projects.nodes) {
+      if (!byId.has(p.id)) byId.set(p.id, { ...p, teamKey: team.key });
+    }
+  }
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+const TEAMS_QUERY = /* GraphQL */ `
+  query DashboardTeams { teams { nodes { id key name } } }
+`;
+
+export async function fetchTeams(): Promise<Team[]> {
+  const data = await linearQuery<{ teams: { nodes: Team[] } }>(TEAMS_QUERY, {});
+  return [...data.teams.nodes].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 // ---------------------------------------------------------------------------
@@ -204,20 +225,23 @@ const ISSUE_FIELDS = /* GraphQL */ `
   labels { nodes { name color } }
 `;
 
-let cachedTeamId: string | null = null;
+const cachedTeamIds = new Map<string, string>();
 
-async function getTeamId(): Promise<string> {
-  if (cachedTeamId) return cachedTeamId;
+// Resolve a team id from a team key. Falls back to LINEAR_TEAM_KEY, then to the
+// first team in the workspace, so writes still land somewhere valid even when
+// the env default no longer matches an existing team.
+async function getTeamId(key?: string): Promise<string> {
+  const wanted = key ?? teamKey();
+  const cached = cachedTeamIds.get(wanted);
+  if (cached) return cached;
   const data = await linearQuery<{
-    teams: { nodes: { id: string }[] };
-  }>(
-    `query TeamId($key:String!){ teams(filter:{ key:{ eq:$key } }){ nodes { id } } }`,
-    { key: teamKey() },
-  );
-  const id = data.teams.nodes[0]?.id;
-  if (!id) throw new Error(`Team ${teamKey()} not found.`);
-  cachedTeamId = id;
-  return id;
+    teams: { nodes: { id: string; key: string }[] };
+  }>(`query TeamIds{ teams { nodes { id key } } }`, {});
+  const nodes = data.teams.nodes;
+  const match = nodes.find((t) => t.key === wanted) ?? nodes[0];
+  if (!match) throw new Error("No team found in this workspace.");
+  cachedTeamIds.set(wanted, match.id);
+  return match.id;
 }
 
 export async function fetchUsers(): Promise<User[]> {
@@ -249,6 +273,8 @@ export async function fetchUsers(): Promise<User[]> {
 }
 
 export async function fetchStates(): Promise<WorkflowStateOption[]> {
+  // Merge workflow states from every team (deduped by id) so the status dropdown
+  // has valid options regardless of which team an issue belongs to.
   const data = await linearQuery<{
     teams: {
       nodes: {
@@ -256,19 +282,20 @@ export async function fetchStates(): Promise<WorkflowStateOption[]> {
       }[];
     };
   }>(
-    `query States($key:String!){
-      teams(filter:{ key:{ eq:$key } }){
-        nodes { states { nodes { id name type color position } } }
-      }
+    `query States{
+      teams { nodes { states { nodes { id name type color position } } } }
     }`,
-    { key: teamKey() },
+    {},
   );
-  const states = data.teams.nodes[0]?.states.nodes ?? [];
-  return [...states].sort((a, b) => a.position - b.position);
+  const byId = new Map<string, WorkflowStateOption>();
+  for (const team of data.teams.nodes) {
+    for (const s of team.states.nodes) if (!byId.has(s.id)) byId.set(s.id, s);
+  }
+  return [...byId.values()].sort((a, b) => a.position - b.position);
 }
 
 export async function createIssue(input: CreateIssueInput): Promise<Issue> {
-  const teamId = await getTeamId();
+  const teamId = await getTeamId(input.teamKey);
   const data = await linearQuery<{
     issueCreate: { success: boolean; issue: RawIssue };
   }>(

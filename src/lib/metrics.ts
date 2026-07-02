@@ -124,6 +124,15 @@ export function filterByProject(
 }
 
 /**
+ * Scope to a single team by its key (e.g. "CBC", "FAC"). "all" (or null) = no
+ * filter. Issues without team info are excluded once a specific team is picked.
+ */
+export function filterByTeam(issues: Issue[], teamKey: string | null): Issue[] {
+  if (!teamKey || teamKey === "all") return issues;
+  return issues.filter((i) => i.team?.key === teamKey);
+}
+
+/**
  * Scope to a single assignee. "all" = no filter, "unassigned" = no assignee,
  * otherwise match the assignee's user id.
  */

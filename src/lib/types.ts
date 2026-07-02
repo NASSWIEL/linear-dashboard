@@ -24,6 +24,18 @@ export interface IssueProject {
   name: string;
 }
 
+export interface IssueTeam {
+  id: string;
+  key: string;
+  name: string;
+}
+
+export interface Team {
+  id: string;
+  key: string;
+  name: string;
+}
+
 export interface IssueLabel {
   name: string;
   color: string;
@@ -44,6 +56,7 @@ export interface Issue {
   state: IssueState;
   assignee: IssueAssignee | null;
   project: IssueProject | null;
+  team?: IssueTeam | null;
   labels: IssueLabel[];
 }
 
@@ -52,6 +65,7 @@ export interface Project {
   name: string;
   color: string | null;
   state: string | null;
+  teamKey?: string | null;
 }
 
 export interface StateColumn {
@@ -90,6 +104,10 @@ export interface ProjectsResponse {
   projects: Project[];
 }
 
+export interface TeamsResponse {
+  teams: Team[];
+}
+
 export interface User {
   id: string;
   name: string;
@@ -123,6 +141,7 @@ export interface CreateIssueInput {
   assigneeId?: string | null;
   priority?: number;
   dueDate?: string | null;
+  teamKey?: string;
 }
 
 export interface UpdateIssueInput {
