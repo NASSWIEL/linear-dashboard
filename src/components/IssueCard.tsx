@@ -3,24 +3,11 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { Issue } from "@/lib/types";
-import { dueInfo, priorityStyle, TEAM_CARD_COLORS } from "@/lib/format";
+import { dueInfo, priorityStyle, LIGHT_TOKENS, TEAM_CARD_COLORS } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
 import { Markdown } from "./Markdown";
 import { StatusSelect } from "./StatusSelect";
 import { AssigneeSelect } from "./AssigneeSelect";
-
-// Light-theme values of the semantic tokens, pinned on team-colored cards so
-// their (light) background stays legible even in dark mode. Mirrors :root in
-// globals.css. `colorScheme: light` keeps form controls light too.
-const LIGHT_TOKENS: CSSProperties = {
-  colorScheme: "light",
-  ["--fg" as string]: "#18181b",
-  ["--muted" as string]: "#52525b",
-  ["--faint" as string]: "#a1a1aa",
-  ["--border" as string]: "#e4e4e7",
-  ["--elevated" as string]: "#e4e4e7",
-  ["--surface" as string]: "#ffffff",
-};
 
 export function IssueCard({ issue }: { issue: Issue }) {
   const { busyIssueId, archiveIssue, editIssue, updateIssue, projects } =

@@ -1,5 +1,20 @@
 // Client-safe presentation helpers (no secrets, no server-only imports).
 
+import type { CSSProperties } from "react";
+
+// Light-theme values of the semantic tokens, pinned (via inline CSS vars) on any
+// element given a fixed light background — a team-colored card or sidebar row —
+// so its text stays legible even in dark mode. Mirrors :root in globals.css.
+export const LIGHT_TOKENS: CSSProperties = {
+  colorScheme: "light",
+  ["--fg" as string]: "#18181b",
+  ["--muted" as string]: "#52525b",
+  ["--faint" as string]: "#a1a1aa",
+  ["--border" as string]: "#e4e4e7",
+  ["--elevated" as string]: "#e4e4e7",
+  ["--surface" as string]: "#ffffff",
+};
+
 export interface PriorityStyle {
   label: string;
   dot: string; // tailwind bg color for the indicator

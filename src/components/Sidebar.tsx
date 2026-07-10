@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Project, Team, User } from "@/lib/types";
-import { initials, userColor, TEAM_CARD_COLORS } from "@/lib/format";
+import { initials, userColor, LIGHT_TOKENS, TEAM_CARD_COLORS } from "@/lib/format";
 
 export function Sidebar({
   teams,
@@ -76,6 +76,7 @@ export function Sidebar({
                 active={selectedTeam === t.key}
                 onClick={() => onSelectTeam(t.key)}
                 dotColor={TEAM_CARD_COLORS[t.key] ?? "#6366f1"}
+                rowColor={TEAM_CARD_COLORS[t.key]}
                 label={t.name}
                 count={countByTeam(t.key)}
                 onArchive={null}
@@ -186,6 +187,7 @@ function ProjectItem({
   active,
   onClick,
   dotColor,
+  rowColor,
   label,
   count,
   onArchive,
@@ -193,6 +195,7 @@ function ProjectItem({
   active: boolean;
   onClick: () => void;
   dotColor: string;
+  rowColor?: string;
   label: string;
   count: number;
   onArchive: (() => void) | null;
@@ -204,17 +207,22 @@ function ProjectItem({
       <button
         type="button"
         onClick={onClick}
+        style={rowColor ? { backgroundColor: rowColor, ...LIGHT_TOKENS } : undefined}
         className={`flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
-          active
-            ? "bg-elevated text-fg"
-            : "text-muted hover:bg-surface hover:text-fg"
+          rowColor
+            ? `text-fg ring-inset ${active ? "ring-2 ring-sky-500/70" : "ring-1 ring-black/10 hover:ring-black/20"}`
+            : active
+              ? "bg-elevated text-fg"
+              : "text-muted hover:bg-surface hover:text-fg"
         }`}
       >
         <span className="flex min-w-0 items-center gap-2">
-          <span
-            className="h-2.5 w-2.5 shrink-0 rounded-sm ring-1 ring-inset ring-black/10 dark:ring-white/15"
-            style={{ backgroundColor: dotColor }}
-          />
+          {!rowColor && (
+            <span
+              className="h-2.5 w-2.5 shrink-0 rounded-sm ring-1 ring-inset ring-black/10 dark:ring-white/15"
+              style={{ backgroundColor: dotColor }}
+            />
+          )}
           <span className="truncate">{label}</span>
         </span>
         <span className="shrink-0 rounded-full bg-elevated px-1.5 py-0.5 text-[11px] tabular-nums text-muted">

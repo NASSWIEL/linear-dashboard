@@ -48,17 +48,17 @@ export function KpiCards({
     {
       label: "En cours",
       value: metrics.inProgress,
-      accent: "text-sky-700 dark:text-sky-300",
-      ring: "ring-sky-500/30",
-      bg: "bg-sky-500/10",
+      accent: "text-amber-600 dark:text-amber-300",
+      ring: "ring-amber-500/30",
+      bg: "bg-amber-400/15",
       filter: "in-progress",
     },
     {
       label: "En retard",
       value: metrics.overdueCount,
-      accent: metrics.overdueCount > 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400",
-      ring: metrics.overdueCount > 0 ? "ring-red-500/30" : "ring-emerald-500/30",
-      bg: metrics.overdueCount > 0 ? "bg-red-500/10" : "bg-emerald-500/10",
+      accent: "text-red-700 dark:text-red-400",
+      ring: "ring-red-500/30",
+      bg: "bg-red-500/10",
       filter: "overdue",
     },
     {
