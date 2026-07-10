@@ -1,12 +1,33 @@
 "use client";
 
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import type { Issue } from "@/lib/types";
 import { dueInfo, priorityStyle } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
 import { Markdown } from "./Markdown";
 import { StatusSelect } from "./StatusSelect";
 import { AssigneeSelect } from "./AssigneeSelect";
+
+// Team-specific card backgrounds requested by the client (keyed by team key,
+// i.e. the issue identifier prefix). Extend as more teams get a house color.
+const TEAM_CARD_BG: Record<string, string> = {
+  FAC: "#DAF2E3",
+  CBC: "#FFEEE8",
+};
+
+// Light-theme values of the semantic tokens, pinned on team-colored cards so
+// their (light) background stays legible even in dark mode. Mirrors :root in
+// globals.css. `colorScheme: light` keeps form controls light too.
+const LIGHT_TOKENS: CSSProperties = {
+  colorScheme: "light",
+  ["--fg" as string]: "#18181b",
+  ["--muted" as string]: "#52525b",
+  ["--faint" as string]: "#a1a1aa",
+  ["--border" as string]: "#e4e4e7",
+  ["--elevated" as string]: "#e4e4e7",
+  ["--surface" as string]: "#ffffff",
+};
 
 export function IssueCard({ issue }: { issue: Issue }) {
   const { busyIssueId, archiveIssue, editIssue, updateIssue, projects } =
@@ -20,14 +41,27 @@ export function IssueCard({ issue }: { issue: Issue }) {
   const overdue = due !== null && due.daysDiff < 0 && !isDone;
   const busy = busyIssueId === issue.id;
 
+  // Fixed per-team card background (overrides the per-project tint). These are
+  // light pastels, so on a team-colored card we also pin the semantic text/
+  // border tokens to their light values — otherwise dark-mode text (near-white)
+  // would be illegible on the pastel. Tokens are inherited via CSS vars, so the
+  // whole card renders light regardless of theme.
+  const teamBg = issue.team?.key
+    ? TEAM_CARD_BG[issue.team.key]
+    : undefined;
+
   // Light per-project tint for visual distinction (project color is on the
   // projects list, not the issue's embedded project). Falls back to the plain
   // surface for orphan issues ("Sans projet") or projects with no color.
   const projectColor =
     projects.find((p) => p.id === issue.project?.id)?.color ?? null;
-  const cardBg = projectColor
-    ? `color-mix(in srgb, ${projectColor} 8%, var(--surface))`
-    : "var(--surface)";
+  const cardStyle: CSSProperties = teamBg
+    ? { backgroundColor: teamBg, ...LIGHT_TOKENS }
+    : {
+        backgroundColor: projectColor
+          ? `color-mix(in srgb, ${projectColor} 8%, var(--surface))`
+          : "var(--surface)",
+      };
 
   return (
     <div
@@ -41,7 +75,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
           setExpanded((v) => !v);
         }
       }}
-      style={{ backgroundColor: cardBg }}
+      style={cardStyle}
       className={`cursor-pointer rounded-lg border border-border p-3 transition-colors hover:border-border ${
         busy ? "opacity-60" : ""
       }`}
