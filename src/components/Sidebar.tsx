@@ -115,6 +115,7 @@ export function Sidebar({
             active={selectedId === project.id}
             onClick={() => onSelect(project.id)}
             dotColor={project.color ?? "#71717a"}
+            rowColor={project.teamKey ? TEAM_CARD_COLORS[project.teamKey] : undefined}
             label={project.name}
             count={countFor(project.id)}
             onArchive={() => onArchiveProject(project.id)}

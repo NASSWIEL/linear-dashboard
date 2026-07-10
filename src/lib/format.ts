@@ -90,6 +90,7 @@ const STATUS_HUES: [RegExp, string][] = [
 export const TEAM_CARD_COLORS: Record<string, string> = {
   FAC: "#DAF2E3",
   CBC: "#FFEEE8",
+  RAG: "#C3D2F7",
 };
 
 export function statusColor(name: string): string {
