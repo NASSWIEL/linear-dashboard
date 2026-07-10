@@ -121,6 +121,7 @@ export interface WorkflowStateOption {
   type: WorkflowStateType;
   color: string;
   position: number;
+  teamKey: string;
 }
 
 export interface MetaResponse {

@@ -42,12 +42,12 @@ const FIXTURE_USERS: User[] = [
 ];
 
 const FIXTURE_STATES: WorkflowStateOption[] = [
-  { id: "st-backlog", name: "Backlog", type: "backlog", color: "#bec2c8", position: 0 },
-  { id: "st-todo", name: "Todo", type: "unstarted", color: "#e2e2e2", position: 1 },
-  { id: "st-prog", name: "In Progress", type: "started", color: "#f2c94c", position: 2 },
-  { id: "st-review", name: "In Review", type: "started", color: "#5e6ad2", position: 3 },
-  { id: "st-done", name: "Done", type: "completed", color: "#4cb782", position: 4 },
-  { id: "st-cancel", name: "Canceled", type: "canceled", color: "#95a2b3", position: 5 },
+  { id: "st-backlog", name: "Backlog", type: "backlog", color: "#bec2c8", position: 0, teamKey: "REC" },
+  { id: "st-todo", name: "Todo", type: "unstarted", color: "#e2e2e2", position: 1, teamKey: "REC" },
+  { id: "st-prog", name: "In Progress", type: "started", color: "#f2c94c", position: 2, teamKey: "REC" },
+  { id: "st-review", name: "In Review", type: "started", color: "#5e6ad2", position: 3, teamKey: "REC" },
+  { id: "st-done", name: "Done", type: "completed", color: "#4cb782", position: 4, teamKey: "REC" },
+  { id: "st-cancel", name: "Canceled", type: "canceled", color: "#95a2b3", position: 5, teamKey: "REC" },
 ];
 
 export const FIXTURE_META: MetaResponse = {

@@ -4,11 +4,13 @@ import { useState } from "react";
 import type { Issue } from "@/lib/types";
 import { dueInfo, priorityStyle } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
+import { Markdown } from "./Markdown";
 import { StatusSelect } from "./StatusSelect";
 import { AssigneeSelect } from "./AssigneeSelect";
 
 export function IssueCard({ issue }: { issue: Issue }) {
-  const { busyIssueId, archiveIssue, editIssue } = useDashboard();
+  const { busyIssueId, archiveIssue, editIssue, updateIssue, projects } =
+    useDashboard();
   const [confirmArchive, setConfirmArchive] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const prio = priorityStyle(issue.priorityLabel);
@@ -17,6 +19,15 @@ export function IssueCard({ issue }: { issue: Issue }) {
     issue.state.type === "completed" || issue.state.type === "canceled";
   const overdue = due !== null && due.daysDiff < 0 && !isDone;
   const busy = busyIssueId === issue.id;
+
+  // Light per-project tint for visual distinction (project color is on the
+  // projects list, not the issue's embedded project). Falls back to the plain
+  // surface for orphan issues ("Sans projet") or projects with no color.
+  const projectColor =
+    projects.find((p) => p.id === issue.project?.id)?.color ?? null;
+  const cardBg = projectColor
+    ? `color-mix(in srgb, ${projectColor} 8%, var(--surface))`
+    : "var(--surface)";
 
   return (
     <div
@@ -30,7 +41,8 @@ export function IssueCard({ issue }: { issue: Issue }) {
           setExpanded((v) => !v);
         }
       }}
-      className={`cursor-pointer rounded-lg border border-border bg-surface/60 p-3 transition-colors hover:border-border ${
+      style={{ backgroundColor: cardBg }}
+      className={`cursor-pointer rounded-lg border border-border p-3 transition-colors hover:border-border ${
         busy ? "opacity-60" : ""
       }`}
     >
@@ -55,11 +67,15 @@ export function IssueCard({ issue }: { issue: Issue }) {
       </p>
 
       {expanded && (
-        <div className="mt-2 border-t border-border pt-2">
+        <div
+          className="mt-2 border-t border-border pt-2"
+          onClick={(e) => e.stopPropagation()}
+        >
           {issue.description?.trim() ? (
-            <p className="whitespace-pre-wrap text-xs text-muted">
-              {issue.description}
-            </p>
+            <Markdown
+              source={issue.description}
+              onToggle={(next) => updateIssue(issue.id, { description: next })}
+            />
           ) : (
             <p className="text-xs italic text-faint">Aucune description</p>
           )}

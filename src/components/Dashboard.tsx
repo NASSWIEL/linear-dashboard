@@ -280,6 +280,7 @@ export function Dashboard() {
     <DashboardProvider
       value={{
         meta: metaData ?? null,
+        projects,
         busyIssueId,
         updateIssue: ctxUpdate,
         archiveIssue: ctxArchive,

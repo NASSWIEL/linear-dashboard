@@ -1,10 +1,11 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { MetaResponse, UpdateIssueInput } from "@/lib/types";
+import type { MetaResponse, Project, UpdateIssueInput } from "@/lib/types";
 
 export interface DashboardActions {
   meta: MetaResponse | null;
+  projects: Project[];
   busyIssueId: string | null;
   updateIssue: (id: string, patch: UpdateIssueInput) => Promise<void>;
   archiveIssue: (id: string) => Promise<void>;

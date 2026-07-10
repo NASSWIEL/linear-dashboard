@@ -222,6 +222,7 @@ const ISSUE_FIELDS = /* GraphQL */ `
   state { name type color }
   assignee { id name displayName avatarUrl }
   project { id name }
+  team { id key name }
   labels { nodes { name color } }
 `;
 
@@ -244,6 +245,11 @@ async function getTeamId(key?: string): Promise<string> {
   return match.id;
 }
 
+// Integration/app accounts whose email doesn't use a synthetic *.linear.app
+// domain, so they slip past the suffix filter. Matched case-insensitively on
+// name/displayName. Extend as new bot accounts appear.
+const BOT_NAMES = new Set(["notionai"]);
+
 export async function fetchUsers(): Promise<User[]> {
   const data = await linearQuery<{
     users: {
@@ -261,8 +267,18 @@ export async function fetchUsers(): Promise<User[]> {
     { first: 250 },
   );
   return data.users.nodes
-    // Exclude inactive users and the Linear app/bot (not assignable here).
-    .filter((u) => u.active && !u.email.endsWith("@linear.linear.app"))
+    // Exclude inactive users and app/integration bots (Linear, Notion, and any
+    // other OAuth app account) — they clutter the people filter and aren't real
+    // assignees. Bot accounts use synthetic @*.linear.app / @oauthapp.linear.app
+    // emails; those (like "notionai") that don't are caught by BOT_NAMES.
+    .filter(
+      (u) =>
+        u.active &&
+        !u.email.endsWith("@linear.linear.app") &&
+        !u.email.endsWith("@oauthapp.linear.app") &&
+        !BOT_NAMES.has(u.name.toLowerCase()) &&
+        !BOT_NAMES.has(u.displayName.toLowerCase()),
+    )
     .map((u) => ({
       id: u.id,
       name: u.name,
@@ -278,18 +294,20 @@ export async function fetchStates(): Promise<WorkflowStateOption[]> {
   const data = await linearQuery<{
     teams: {
       nodes: {
-        states: { nodes: WorkflowStateOption[] };
+        key: string;
+        states: { nodes: Omit<WorkflowStateOption, "teamKey">[] };
       }[];
     };
   }>(
     `query States{
-      teams { nodes { states { nodes { id name type color position } } } }
+      teams { nodes { key states { nodes { id name type color position } } } }
     }`,
     {},
   );
   const byId = new Map<string, WorkflowStateOption>();
   for (const team of data.teams.nodes) {
-    for (const s of team.states.nodes) if (!byId.has(s.id)) byId.set(s.id, s);
+    for (const s of team.states.nodes)
+      if (!byId.has(s.id)) byId.set(s.id, { ...s, teamKey: team.key });
   }
   return [...byId.values()].sort((a, b) => a.position - b.position);
 }
