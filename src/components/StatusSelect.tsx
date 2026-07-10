@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { Issue } from "@/lib/types";
+import { statusColor } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
 
 export function StatusSelect({ issue }: { issue: Issue }) {
@@ -51,12 +52,12 @@ export function StatusSelect({ issue }: { issue: Issue }) {
         onClick={() => setOpen((v) => !v)}
         className="inline-flex max-w-[9rem] items-center gap-1.5 rounded-md border border-border px-1.5 py-1 text-[11px] text-fg outline-none transition-colors hover:border-border focus:border-sky-500 disabled:opacity-50"
         style={{
-          backgroundColor: `color-mix(in srgb, ${issue.state.color} 16%, var(--elevated))`,
+          backgroundColor: `color-mix(in srgb, ${statusColor(issue.state.name)} 16%, var(--elevated))`,
         }}
       >
         <span
           className="h-2 w-2 shrink-0 rounded-full"
-          style={{ backgroundColor: issue.state.color }}
+          style={{ backgroundColor: statusColor(issue.state.name) }}
         />
         <span className="truncate">{issue.state.name}</span>
         <span className="ml-auto text-faint">▾</span>
@@ -76,14 +77,14 @@ export function StatusSelect({ issue }: { issue: Issue }) {
                   onClick={() => pick(s.id)}
                   className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px] text-fg transition-colors"
                   style={{
-                    backgroundColor: `color-mix(in srgb, ${s.color} ${
+                    backgroundColor: `color-mix(in srgb, ${statusColor(s.name)} ${
                       selected ? 32 : 14
                     }%, transparent)`,
                   }}
                 >
                   <span
                     className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: s.color }}
+                    style={{ backgroundColor: statusColor(s.name) }}
                   />
                   <span className="truncate">{s.name}</span>
                   {selected && <span className="ml-auto text-faint">✓</span>}

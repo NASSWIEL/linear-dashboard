@@ -53,6 +53,30 @@ export function userColor(key: string): string {
   return `hsl(${h} 62% 52%)`;
 }
 
+// Linear's default palette paints Backlog / Todo / Canceled / Duplicate in
+// near-identical grays, so they're indistinguishable on the board and in the
+// dropdown. Override with a distinct, intuitive hue per lifecycle stage, matched
+// on the (French or English) status name. Unknown names fall back to a colorful
+// deterministic hue so no two distinct statuses ever collide on gray.
+const STATUS_HUES: [RegExp, string][] = [
+  [/triage/i, "#ec4899"], // pink
+  [/duplicate|duplicat|double/i, "#f97316"], // orange
+  [/cancel|annul/i, "#ef4444"], // red
+  [/review|revue|relecture/i, "#8b5cf6"], // violet
+  [/progress|cours|doing|wip/i, "#f59e0b"], // amber
+  [/done|termin|complet|fini|closed/i, "#10b981"], // emerald
+  [/todo|to do|à faire|a faire|unstarted|planned/i, "#3b82f6"], // blue
+  [/backlog|icebox/i, "#64748b"], // slate
+];
+
+export function statusColor(name: string): string {
+  for (const [re, hex] of STATUS_HUES) if (re.test(name)) return hex;
+  // Colorful fallback (never gray) for team-specific status names.
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 360;
+  return `hsl(${h} 68% 55%)`;
+}
+
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";

@@ -2,6 +2,7 @@
 
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import type { StateColumn } from "@/lib/types";
+import { statusColor } from "@/lib/format";
 
 export function StatusChart({
   columns,
@@ -34,7 +35,7 @@ export function StatusChart({
                 stroke="none"
               >
                 {data.map((entry) => (
-                  <Cell key={entry.name} fill={entry.color} />
+                  <Cell key={entry.name} fill={statusColor(entry.name)} />
                 ))}
               </Pie>
               <Tooltip
@@ -67,7 +68,7 @@ export function StatusChart({
                 <span className="flex items-center gap-2 text-muted">
                   <span
                     className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: entry.color }}
+                    style={{ backgroundColor: statusColor(entry.name) }}
                   />
                   {entry.name}
                 </span>
