@@ -69,6 +69,14 @@ const STATUS_HUES: [RegExp, string][] = [
   [/backlog|icebox/i, "#64748b"], // slate
 ];
 
+// Client-requested house color per team (keyed by team key = issue identifier
+// prefix). Used both as the issue-card background and as the team's dot in the
+// sidebar, so a team and its tickets share one color. Extend per new team.
+export const TEAM_CARD_COLORS: Record<string, string> = {
+  FAC: "#DAF2E3",
+  CBC: "#FFEEE8",
+};
+
 export function statusColor(name: string): string {
   for (const [re, hex] of STATUS_HUES) if (re.test(name)) return hex;
   // Colorful fallback (never gray) for team-specific status names.

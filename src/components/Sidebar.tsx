@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Project, Team, User } from "@/lib/types";
-import { initials, userColor } from "@/lib/format";
+import { initials, userColor, TEAM_CARD_COLORS } from "@/lib/format";
 
 export function Sidebar({
   teams,
@@ -75,7 +75,7 @@ export function Sidebar({
                 key={t.id}
                 active={selectedTeam === t.key}
                 onClick={() => onSelectTeam(t.key)}
-                dotColor="#6366f1"
+                dotColor={TEAM_CARD_COLORS[t.key] ?? "#6366f1"}
                 label={t.name}
                 count={countByTeam(t.key)}
                 onArchive={null}
@@ -212,7 +212,7 @@ function ProjectItem({
       >
         <span className="flex min-w-0 items-center gap-2">
           <span
-            className="h-2.5 w-2.5 shrink-0 rounded-sm"
+            className="h-2.5 w-2.5 shrink-0 rounded-sm ring-1 ring-inset ring-black/10 dark:ring-white/15"
             style={{ backgroundColor: dotColor }}
           />
           <span className="truncate">{label}</span>

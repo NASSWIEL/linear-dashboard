@@ -3,18 +3,11 @@
 import { useState } from "react";
 import type { CSSProperties } from "react";
 import type { Issue } from "@/lib/types";
-import { dueInfo, priorityStyle } from "@/lib/format";
+import { dueInfo, priorityStyle, TEAM_CARD_COLORS } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
 import { Markdown } from "./Markdown";
 import { StatusSelect } from "./StatusSelect";
 import { AssigneeSelect } from "./AssigneeSelect";
-
-// Team-specific card backgrounds requested by the client (keyed by team key,
-// i.e. the issue identifier prefix). Extend as more teams get a house color.
-const TEAM_CARD_BG: Record<string, string> = {
-  FAC: "#DAF2E3",
-  CBC: "#FFEEE8",
-};
 
 // Light-theme values of the semantic tokens, pinned on team-colored cards so
 // their (light) background stays legible even in dark mode. Mirrors :root in
@@ -47,7 +40,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
   // would be illegible on the pastel. Tokens are inherited via CSS vars, so the
   // whole card renders light regardless of theme.
   const teamBg = issue.team?.key
-    ? TEAM_CARD_BG[issue.team.key]
+    ? TEAM_CARD_COLORS[issue.team.key]
     : undefined;
 
   // Light per-project tint for visual distinction (project color is on the
