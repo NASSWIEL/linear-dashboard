@@ -7,6 +7,7 @@ interface Kpi {
   value: number | string;
   accent: string;
   ring: string;
+  bg: string;
   filter: MetricFilter;
 }
 
@@ -25,6 +26,7 @@ export function KpiCards({
       value: metrics.total,
       accent: "text-fg",
       ring: "ring-border/40",
+      bg: "bg-zinc-400/10",
       filter: "all",
     },
     {
@@ -32,6 +34,7 @@ export function KpiCards({
       value: metrics.backlog,
       accent: "text-muted",
       ring: "ring-border/40",
+      bg: "bg-slate-500/10",
       filter: "backlog",
     },
     {
@@ -39,6 +42,7 @@ export function KpiCards({
       value: metrics.todo,
       accent: "text-indigo-700 dark:text-indigo-300",
       ring: "ring-indigo-500/30",
+      bg: "bg-indigo-500/10",
       filter: "todo",
     },
     {
@@ -46,6 +50,7 @@ export function KpiCards({
       value: metrics.inProgress,
       accent: "text-sky-700 dark:text-sky-300",
       ring: "ring-sky-500/30",
+      bg: "bg-sky-500/10",
       filter: "in-progress",
     },
     {
@@ -53,6 +58,7 @@ export function KpiCards({
       value: metrics.overdueCount,
       accent: metrics.overdueCount > 0 ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400",
       ring: metrics.overdueCount > 0 ? "ring-red-500/30" : "ring-emerald-500/30",
+      bg: metrics.overdueCount > 0 ? "bg-red-500/10" : "bg-emerald-500/10",
       filter: "overdue",
     },
     {
@@ -60,6 +66,7 @@ export function KpiCards({
       value: metrics.completed,
       accent: "text-emerald-700 dark:text-emerald-300",
       ring: "ring-emerald-500/30",
+      bg: "bg-emerald-500/10",
       filter: "done",
     },
   ];
@@ -74,7 +81,7 @@ export function KpiCards({
             type="button"
             aria-pressed={active}
             onClick={() => onSelect(active ? "all" : kpi.filter)}
-            className={`rounded-xl border bg-surface/60 p-4 text-left ring-1 transition-colors ${
+            className={`rounded-xl border ${kpi.bg} p-4 text-left ring-1 transition-colors ${
               active
                 ? "border-sky-500/60 ring-sky-500/50"
                 : `border-border ${kpi.ring} hover:border-border`
