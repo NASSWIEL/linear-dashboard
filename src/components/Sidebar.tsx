@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Project, Team, User } from "@/lib/types";
-import { initials } from "@/lib/format";
+import { initials, userColor } from "@/lib/format";
 
 export function Sidebar({
   teams,
@@ -155,6 +155,7 @@ export function Sidebar({
             variant="member"
             label={m.displayName}
             avatarUrl={m.avatarUrl}
+            color={userColor(m.id)}
             count={countByAssignee(m.id)}
           />
         ))}
@@ -261,6 +262,7 @@ function PersonItem({
   variant,
   label,
   avatarUrl,
+  color,
   count,
 }: {
   active: boolean;
@@ -268,6 +270,7 @@ function PersonItem({
   variant: "everyone" | "member" | "unassigned";
   label: string;
   avatarUrl?: string | null;
+  color?: string;
   count: number;
 }) {
   return (
@@ -296,7 +299,10 @@ function PersonItem({
             className="h-5 w-5 shrink-0 rounded-full ring-1 ring-border"
           />
         ) : (
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-elevated text-[9px] font-semibold text-fg">
+          <span
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[9px] font-semibold text-white"
+            style={{ backgroundColor: color ?? "var(--elevated)" }}
+          >
             {initials(label)}
           </span>
         )}

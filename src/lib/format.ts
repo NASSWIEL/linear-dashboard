@@ -41,6 +41,18 @@ export function priorityStyle(label: string): PriorityStyle {
   }
 }
 
+/**
+ * Deterministic, evenly-spread color for a user (or any stable key). Same key
+ * always yields the same hue, so a person reads as one color across the board,
+ * the assignee dropdown, and the sidebar. Mid saturation/lightness keeps white
+ * text legible on the swatch in both themes.
+ */
+export function userColor(key: string): string {
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 360;
+  return `hsl(${h} 62% 52%)`;
+}
+
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
