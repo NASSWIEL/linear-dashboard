@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import useSWR from "swr";
@@ -65,6 +65,17 @@ export function Dashboard() {
   const filter = (searchParams.get("filter") as MetricFilter) ?? "all";
   const assignee = searchParams.get("assignee") ?? "all";
   const team = searchParams.get("team") ?? "all";
+
+  // A full page load / refresh returns to the default, unfiltered view. In-app
+  // filter changes go through router.replace and don't remount this component,
+  // so this effect fires only on a real document load — clearing any team /
+  // project / assignee / filter params carried over from the previous session.
+  useEffect(() => {
+    if (window.location.search) {
+      router.replace(pathname, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
     data: issuesData,
@@ -148,8 +159,12 @@ export function Dashboard() {
 
   // Issues with no Linear project (e.g. created from a GitHub repo, never
   // attached to a project). Surfaced as a "Sans projet" bucket so they remain
-  // findable instead of vanishing into "Tous les projets".
-  const noProjectCount = teamIssues.filter((i) => !i.project).length;
+  // findable instead of vanishing into "Tous les projets". Scoped to the active
+  // person filter, so the bucket disappears when the selected assignee has no
+  // orphan issues (Sidebar hides the row when this is 0).
+  const noProjectCount = filterByAssignee(teamIssues, assignee).filter(
+    (i) => !i.project,
+  ).length;
 
   // People counts reflect the current project scope.
   const members = metaData?.users ?? [];
