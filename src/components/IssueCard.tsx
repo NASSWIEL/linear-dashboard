@@ -8,6 +8,7 @@ import { useDashboard } from "./DashboardContext";
 import { Markdown } from "./Markdown";
 import { StatusSelect } from "./StatusSelect";
 import { AssigneeSelect } from "./AssigneeSelect";
+import { PrioritySelect } from "./PrioritySelect";
 
 export function IssueCard({ issue }: { issue: Issue }) {
   const { busyIssueId, archiveIssue, editIssue, updateIssue, projects } =
@@ -120,6 +121,7 @@ export function IssueCard({ issue }: { issue: Issue }) {
       >
         <StatusSelect issue={issue} />
         <AssigneeSelect issue={issue} />
+        <PrioritySelect issue={issue} />
       </div>
 
       <div

@@ -4,18 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import type { Issue } from "@/lib/types";
 import { initials, userColor } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
+import { AnchoredMenu } from "./AnchoredMenu";
 
 export function AssigneeSelect({ issue }: { issue: Issue }) {
   const { meta, busyIssueId, updateIssue } = useDashboard();
   const users = meta?.users ?? [];
   const busy = busyIssueId === issue.id;
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
+      const t = e.target as Node;
+      if (!anchorRef.current?.contains(t) && !menuRef.current?.contains(t))
         setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -41,13 +44,7 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
     ...users,
   ];
 
-  const Swatch = ({
-    id,
-    label,
-  }: {
-    id: string;
-    label: string;
-  }) => (
+  const Swatch = ({ id, label }: { id: string; label: string }) => (
     <span
       className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[8px] font-semibold text-white"
       style={{ backgroundColor: userColor(id) }}
@@ -57,8 +54,9 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
   );
 
   return (
-    <div ref={ref} className="relative inline-flex">
+    <div className="relative inline-flex">
       <button
+        ref={anchorRef}
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -85,11 +83,8 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
         <span className="ml-auto text-faint">▾</span>
       </button>
 
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute left-0 top-full z-20 mt-1 max-h-60 min-w-[9rem] overflow-auto rounded-md border border-border bg-elevated py-1 shadow-lg"
-        >
+      <AnchoredMenu anchorRef={anchorRef} menuRef={menuRef} open={open}>
+        <ul role="listbox">
           <li role="option" aria-selected={!current}>
             <button
               type="button"
@@ -123,7 +118,7 @@ export function AssigneeSelect({ issue }: { issue: Issue }) {
             );
           })}
         </ul>
-      )}
+      </AnchoredMenu>
     </div>
   );
 }

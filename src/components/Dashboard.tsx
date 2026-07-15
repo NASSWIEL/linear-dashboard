@@ -417,6 +417,12 @@ export function Dashboard() {
                 />
 
                 <div className="space-y-5">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+                    <StatusChart columns={metrics.columns} total={metrics.total} />
+                    <PriorityBreakdown buckets={metrics.byPriority} />
+                    <OverduePanel issues={metrics.overdue} />
+                  </div>
+
                   <div className="min-w-0">
                     <div className="mb-3 flex items-center gap-2">
                       <h2 className="text-sm font-semibold text-muted">
@@ -433,12 +439,6 @@ export function Dashboard() {
                       )}
                     </div>
                     <KanbanBoard issues={boardIssues} columns={boardColumns} />
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-                    <StatusChart columns={metrics.columns} total={metrics.total} />
-                    <PriorityBreakdown buckets={metrics.byPriority} />
-                    <OverduePanel issues={metrics.overdue} />
                   </div>
                 </div>
               </>

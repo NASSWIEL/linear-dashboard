@@ -4,12 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import type { Issue } from "@/lib/types";
 import { statusColor } from "@/lib/format";
 import { useDashboard } from "./DashboardContext";
+import { AnchoredMenu } from "./AnchoredMenu";
 
 export function StatusSelect({ issue }: { issue: Issue }) {
   const { meta, busyIssueId, updateIssue } = useDashboard();
   const busy = busyIssueId === issue.id;
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   // Scope options to the issue's team: the workspace merges every team's
   // workflow states, so without this filter the same names (Backlog, Todo…)
@@ -22,7 +24,11 @@ export function StatusSelect({ issue }: { issue: Issue }) {
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
+      const t = e.target as Node;
+      if (
+        !anchorRef.current?.contains(t) &&
+        !menuRef.current?.contains(t)
+      )
         setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => {
@@ -42,8 +48,9 @@ export function StatusSelect({ issue }: { issue: Issue }) {
   };
 
   return (
-    <div ref={ref} className="relative inline-flex">
+    <div className="relative inline-flex">
       <button
+        ref={anchorRef}
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
@@ -63,11 +70,8 @@ export function StatusSelect({ issue }: { issue: Issue }) {
         <span className="ml-auto text-faint">▾</span>
       </button>
 
-      {open && (
-        <ul
-          role="listbox"
-          className="absolute left-0 top-full z-20 mt-1 min-w-[9rem] overflow-hidden rounded-md border border-border bg-elevated py-1 shadow-lg"
-        >
+      <AnchoredMenu anchorRef={anchorRef} menuRef={menuRef} open={open}>
+        <ul role="listbox">
           {states.map((s) => {
             const selected = s.name === issue.state.name;
             return (
@@ -93,7 +97,7 @@ export function StatusSelect({ issue }: { issue: Issue }) {
             );
           })}
         </ul>
-      )}
+      </AnchoredMenu>
     </div>
   );
 }
