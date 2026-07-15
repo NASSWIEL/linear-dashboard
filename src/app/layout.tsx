@@ -36,6 +36,16 @@ export default function RootLayout({
             __html: `try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark')}else{document.documentElement.classList.remove('dark')}}catch(e){}`,
           }}
         />
+        {/* A full page load / refresh returns to the default, unfiltered view:
+            strip any team/project/assignee/filter query params before React
+            hydrates, so it initialises with a clean URL. In-app filter changes
+            (client-side router.replace) never trigger a document load, so they
+            are unaffected. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(location.search){history.replaceState(null,'',location.pathname+location.hash)}}catch(e){}`,
+          }}
+        />
       </head>
       <body className="min-h-screen bg-bg font-sans antialiased">
         <SessionProvider>{children}</SessionProvider>
