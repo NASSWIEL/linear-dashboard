@@ -8,6 +8,12 @@ import type {
   Project,
   UpdateIssueInput,
 } from "@/lib/types";
+import {
+  Markdown,
+  assembleDescription,
+  splitChecklist,
+  type ChecklistItem,
+} from "./Markdown";
 
 const PRIORITIES = [
   { value: 0, label: "Aucune priorité" },
@@ -42,8 +48,12 @@ export function IssueModal({
   const currentStateId =
     issue && states.find((s) => s.name === issue.state.name)?.id;
 
+  const initial = splitChecklist(issue?.description);
   const [title, setTitle] = useState(issue?.title ?? "");
-  const [description, setDescription] = useState(issue?.description ?? "");
+  const [body, setBody] = useState(initial.body);
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(initial.items);
+  const [newItem, setNewItem] = useState("");
+  const [preview, setPreview] = useState(false);
   const [projectId, setProjectId] = useState(
     issue?.project?.id ?? defaultProjectId ?? "",
   );
@@ -62,6 +72,7 @@ export function IssueModal({
     }
     setSubmitting(true);
     setError(null);
+    const description = assembleDescription(body, checklist);
     try {
       if (mode === "create") {
         await onCreate({
@@ -125,16 +136,111 @@ export function IssueModal({
           </div>
 
           <div>
+            <div className="mb-1 flex items-center justify-between">
+              <label className="block text-xs text-muted">Description</label>
+              <button
+                type="button"
+                onClick={() => setPreview((v) => !v)}
+                className="text-[11px] text-muted hover:text-fg"
+              >
+                {preview ? "✎ Écrire" : "👁 Aperçu"}
+              </button>
+            </div>
+            {preview ? (
+              <div className="min-h-[5rem] rounded-lg border border-border bg-surface px-3 py-2">
+                {body.trim() || checklist.length ? (
+                  <Markdown source={assembleDescription(body, checklist)} />
+                ) : (
+                  <p className="text-xs italic text-faint">Rien à prévisualiser</p>
+                )}
+              </div>
+            ) : (
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={3}
+                placeholder="Markdown supporté : **gras**, ## Titre, - puce…"
+                className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
+              />
+            )}
+          </div>
+
+          <div>
             <label className="mb-1 block text-xs text-muted">
-              Description
+              Liste de contrôle
             </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              placeholder="Ajouter une description…"
-              className="w-full resize-y rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-sky-500"
-            />
+            <div className="space-y-1.5">
+              {checklist.map((item, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={item.done}
+                    onChange={() =>
+                      setChecklist((cl) =>
+                        cl.map((it, j) =>
+                          j === i ? { ...it, done: !it.done } : it,
+                        ),
+                      )
+                    }
+                    className="shrink-0 cursor-pointer accent-sky-500 [color-scheme:light]"
+                  />
+                  <input
+                    value={item.text}
+                    onChange={(e) =>
+                      setChecklist((cl) =>
+                        cl.map((it, j) =>
+                          j === i ? { ...it, text: e.target.value } : it,
+                        ),
+                      )
+                    }
+                    className="flex-1 rounded-md border border-border bg-surface px-2 py-1 text-sm text-fg outline-none focus:border-sky-500"
+                  />
+                  <button
+                    type="button"
+                    aria-label="Supprimer l'élément"
+                    onClick={() =>
+                      setChecklist((cl) => cl.filter((_, j) => j !== i))
+                    }
+                    className="shrink-0 px-1 text-muted hover:text-red-500"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <span className="w-3.5" />
+                <input
+                  value={newItem}
+                  onChange={(e) => setNewItem(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && newItem.trim()) {
+                      e.preventDefault();
+                      setChecklist((cl) => [
+                        ...cl,
+                        { text: newItem.trim(), done: false },
+                      ]);
+                      setNewItem("");
+                    }
+                  }}
+                  placeholder="Ajouter un élément…"
+                  className="flex-1 rounded-md border border-border bg-surface px-2 py-1 text-sm text-fg outline-none focus:border-sky-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!newItem.trim()) return;
+                    setChecklist((cl) => [
+                      ...cl,
+                      { text: newItem.trim(), done: false },
+                    ]);
+                    setNewItem("");
+                  }}
+                  className="shrink-0 rounded-md border border-border px-2 py-1 text-xs text-muted hover:text-fg"
+                >
+                  + Ajouter
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">

@@ -1,6 +1,8 @@
 @AGENTS.md
 
-# Suivi IA — AT (Linear Dashboard)
+# Suivi Projets : BT-IA (Linear Dashboard)
+
+UI for CGI / **BT-IA** unit. Workspace = Linear org "DailyKuvia", single team **Recast-test (REC)**. Real data since the Planner migration (no more demo issues).
 
 ## Stack
 
@@ -9,6 +11,8 @@
 - **Tailwind v4** — CSS-first `@theme` / `@custom-variant`, NO `tailwind.config.ts`. Semantic tokens in `globals.css` only.
 - **SWR** for client-side data fetching with polling
 - **recharts** for the status donut chart
+- **react-markdown** + **remark-gfm** — render issue descriptions as markdown + interactive GFM task-lists (checklists) on cards and in the modal preview
+- **next-auth v5 (beta)** — GitHub OAuth (wired but env vars NOT set in prod → session is dormant; see Auth note)
 - **Vitest** for unit tests (`npm test`)
 - Node v24, npm 11
 
@@ -32,7 +36,10 @@ Dev server runs on port 3002 (3000 is usually occupied).
 LINEAR_API_KEY=<personal key from Linear → Settings → API>
 LINEAR_TEAM_KEY=REC
 NEXT_PUBLIC_LINEAR_TEAM_KEY=REC
+LINEAR_WEBHOOK_SECRET=<signing secret of the Linear webhook>  # for api/linear/webhook
 ```
+
+Setting Vercel env via CLI works from **bash** (`printf '<val>' | npx vercel env add NAME production`) — NOT PowerShell piping (BOM). AUTH_* vars (for NextAuth) are intentionally unset (see Auth note).
 
 **NEVER** set these via `vercel env add` piped in PowerShell — PowerShell adds a BOM (U+FEFF) that breaks the Authorization header. Use the Vercel dashboard UI instead.
 
@@ -44,31 +51,42 @@ src/
     page.tsx                    # entry point (Suspense wrapper)
     layout.tsx                  # no-flash theme script, metadata
     globals.css                 # semantic token system (dark/light)
+    auth.ts                     # NextAuth v5 GitHub provider (root src/auth.ts)
     api/
       issues/route.ts           # GET all issues + POST create
       issues/[id]/route.ts      # PATCH update + DELETE (archive)
-      projects/route.ts         # GET all projects
+      projects/route.ts         # GET all projects + POST create
+      projects/[id]/route.ts    # DELETE (archive project)
       projects/[id]/members/    # GET/POST/DELETE membership
       meta/route.ts             # GET {users, states} for dropdowns
+      linear/webhook/route.ts   # Linear webhook (HMAC) → repo→project auto-mapping
+      github/repos/route.ts     # list GitHub repos (needs session token — auth)
+      workspace/invite/route.ts # POST organizationInviteCreate
+      auth/[...nextauth]/route.ts
   lib/
-    linear.ts                   # GraphQL client (server-only)
-    metrics.ts                  # pure functions: isOverdue, deriveMetrics, filter*
+    linear.ts                   # GraphQL client (server-only); fetchProjects is TEAM-scoped (first:50, complexity cap)
+    metrics.ts                  # pure functions: isOverdue, deriveMetrics, filterByProject ("none"=no-project), filter*
     types.ts                    # all TypeScript interfaces
     fixtures.ts                 # offline deterministic dataset (LINEAR_FIXTURES=1)
     format.ts                   # relativeTime helper
   components/
     Dashboard.tsx               # main client component (SWR, URL params, mutations)
-    Sidebar.tsx                 # project switcher + people filter
+    Sidebar.tsx                 # project switcher + people filter + "Sans projet" bucket
     KpiCards.tsx                # 6 clickable KPI filter cards
-    KanbanBoard.tsx             # issues grouped by status column
-    IssueCard.tsx               # inline status/assignee dropdowns, edit/archive
-    IssueModal.tsx              # create/edit modal
-    MembersModal.tsx            # add/remove project members
+    KanbanBoard.tsx             # issues grouped by status column (cards w-80)
+    IssueCard.tsx               # expandable; renders desc via <Markdown> + interactive checklist; inline status/assignee, edit/archive
+    Markdown.tsx                # SHARED markdown renderer (react-markdown+remark-gfm) + splitChecklist/assembleDescription/toggleNthChecklistLine
+    IssueModal.tsx              # create/edit; markdown body + write/preview toggle + Planner-style checklist builder
+    StatusSelect.tsx            # inline status <select> (uses ctx.updateIssue)
+    AssigneeSelect.tsx          # inline assignee <select>
+    MembersModal.tsx            # add/remove project members + invite workspace member
+    AddProjectModal.tsx         # new project (GitHub import tab / manual tab)
+    AssignProjectModal.tsx      # assign members to projects (matrix)
     StatusChart.tsx             # recharts donut
     PriorityBreakdown.tsx
     OverduePanel.tsx
-    ThemeToggle.tsx             # dark/light toggle, persists to localStorage
-    DashboardContext.tsx        # meta + mutation functions via context
+    ThemeToggle.tsx             # dark/light toggle, persists to localStorage (default light)
+    DashboardContext.tsx        # meta + mutation functions via context (updateIssue/archiveIssue/editIssue)
 public/assets/
   lg_cgi_color.png              # CGI wordmark logo (red)
 ```
@@ -81,6 +99,24 @@ public/assets/
 - All route handlers use `export const dynamic = "force-dynamic"` — no server cache
 - Delete = `issueArchive` mutation (reversible, not hard delete)
 - Project membership: `projectUpdate(input:{memberIds:[...]})` — no dedicated add/remove mutation; read current set, write modified list
+
+## Markdown descriptions & checklists
+
+- Issue descriptions are **markdown**. Rendered via the shared `components/Markdown.tsx` (`react-markdown` + `remark-gfm`).
+- **Checklists** = GFM task-list lines `- [ ]` / `- [x]` under a `## Liste de contrôle` heading. On a card they render as **interactive checkboxes**: toggling one edits the source line (`toggleNthChecklistLine`, matched by checkbox index) and persists via `updateIssue(id,{description})`.
+- Empty checkbox forced white in dark mode via `[color-scheme:light]` on the input.
+- `IssueModal` round-trips with `splitChecklist(md) → {body, items}` and `assembleDescription(body, items)`: free body (markdown, write/preview toggle) + a Planner-style checklist builder (add/check/edit/remove). Keep these helpers the single source of truth — reuse, don't duplicate.
+
+## Repo → project auto-mapping (webhook)
+
+- `api/linear/webhook/route.ts` receives Linear webhooks (Issue + Attachment), verifies HMAC-SHA256 (`LINEAR_WEBHOOK_SECRET`), and for an issue carrying a GitHub attachment, finds-or-creates a Linear project named after the repo and assigns the issue (`linkIssueToRepoProject` in linear.ts). Idempotent. Fills the gap that Linear's native GitHub sync maps repo→team, never repo→project.
+
+## Planner migration (done 2026-06-03)
+
+- All demo issues deleted; real data migrated from Microsoft Planner screenshots → issues **REC-71…REC-99** in project "COVEA - Suivi projet".
+- Buckets → **labels** (Initialisation, Documentation legacy, Stratégie & validation, Production code, Refactoring Recast) + Planner tags as labels (Recast, Digishore, Jalon, Pilotage, Equipe).
+- Multi-assignee Planner tasks → duplicated (one issue per assignee). Members not yet on Linear (Sara Ismail, Clément Leroy) → unassigned + a `> 👤 Assigné prévu : …` note in the description. Naif/Kyllian/Quentin are real Linear users.
+- Companion: Notion Custom Agent that ticks checklists / updates state from meeting transcripts — instructions in `docs/notion-custom-agent-instructions.md`.
 
 ## URL param composition
 
@@ -109,8 +145,12 @@ Semantic CSS vars in `globals.css`:
 
 - **URL:** https://linear-dashboard-beta.vercel.app
 - **Vercel project:** `nayef-asswiels-projects/linear-dashboard`
-- Auto-deploys on push to `main` via GitHub integration
-- Currently **public / no auth** (POC mode — password gate is deferred, documented in `docs/POC-PLAN.md`)
+- Deploy with `npx vercel --prod --yes` from `dashboard/` (also auto-deploys on push to `main`).
+- Currently **public / no auth** (POC mode).
+
+## Auth note (deferred — known dormant)
+
+NextAuth GitHub is wired (`src/auth.ts`, login page, SessionProvider) but the env vars are **not set in prod** → `/api/auth/session` returns 500 and the GitHub-import tab shows "Non authentifié" (`/api/github/repos` 401). These are the ONLY current prod console errors and are expected. To activate: create a GitHub OAuth App + set `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `ALLOWED_GITHUB_LOGINS` on Vercel. The dashboard otherwise works fully without it.
 
 ## Overdue rule
 
