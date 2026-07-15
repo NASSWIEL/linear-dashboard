@@ -62,10 +62,30 @@ export function priorityStyle(label: string): PriorityStyle {
  * the assignee dropdown, and the sidebar. Mid saturation/lightness keeps white
  * text legible on the swatch in both themes.
  */
+// Curated per-user avatar palette: medium-tone colors (Tailwind-600 tier — not
+// too light, not too dark, uniform perceived weight, white-text friendly),
+// deliberately distinct from the light team pastels (TEAM_CARD_COLORS) and well
+// separated from each other. A user's id deterministically maps to one slot, so
+// every current member keeps a stable color and any newly added member is
+// automatically assigned one of these — no code change needed per member.
+// Slots 3/4/5/6 currently land on quentin/corto/jonas/naif (teal/indigo/rose/
+// lime); slots 0/1/2/7 (cyan/purple/fuchsia/green) are held for future members.
+export const USER_COLORS = [
+  "#0891B2", // 0 cyan
+  "#9333EA", // 1 purple
+  "#C026D3", // 2 fuchsia
+  "#0D9488", // 3 teal
+  "#4F46E5", // 4 indigo
+  "#E11D48", // 5 rose
+  "#65A30D", // 6 lime
+  "#16A34A", // 7 green
+];
+
 export function userColor(key: string): string {
   let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) % 360;
-  return `hsl(${h} 62% 52%)`;
+  for (let i = 0; i < key.length; i++)
+    h = (h * 31 + key.charCodeAt(i)) % 2147483647;
+  return USER_COLORS[h % USER_COLORS.length];
 }
 
 // Linear's default palette paints Backlog / Todo / Canceled / Duplicate in
