@@ -31,12 +31,7 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
             const due = dueInfo(issue.dueDate);
             return (
               <li key={issue.id}>
-                <a
-                  href={issue.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-surface"
-                >
+                <div className="flex items-center justify-between gap-3 px-4 py-2.5">
                   <div className="min-w-0">
                     <p className="truncate text-sm text-fg">
                       {issue.title}
@@ -48,7 +43,7 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
                   <span className="shrink-0 text-xs font-medium text-red-700 dark:text-red-400">
                     {due?.text}
                   </span>
-                </a>
+                </div>
               </li>
             );
           })}
