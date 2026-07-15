@@ -69,11 +69,13 @@ export function IssueCard({ issue }: { issue: Issue }) {
             editIssue(issue.parent!.id);
           }}
           title={`Ouvrir la tâche parente ${issue.parent.identifier}`}
-          className="mb-1.5 flex w-full items-center gap-1 truncate text-left text-[11px] text-muted hover:text-sky-700 dark:hover:text-sky-300"
+          className="mb-1.5 flex w-full items-center gap-1 truncate text-left text-[13px] font-medium text-fg hover:text-sky-700 dark:hover:text-sky-300"
         >
-          <span className="shrink-0 opacity-70">Sous-tâche de</span>
-          <span className="font-mono shrink-0">{issue.parent.identifier}</span>
-          <span className="truncate opacity-90">· {issue.parent.title}</span>
+          <span className="shrink-0">Sous-tâche de</span>
+          <span className="font-mono shrink-0 text-sky-700 dark:text-sky-400">
+            {issue.parent.identifier}
+          </span>
+          <span className="truncate">· {issue.parent.title}</span>
         </button>
       )}
 
