@@ -70,15 +70,21 @@ export function Dashboard() {
   // filter changes go through router.replace and don't remount this component,
   // so this effect fires only on a real document load — clearing any team /
   // project / assignee / filter params carried over from the previous session.
-  // The replace is deferred a tick: in the production build a router.replace
-  // issued synchronously during hydration is swallowed (the App Router hasn't
-  // finished reconciling the initial URL), so we wait for the next frame.
+  // In the production build the App Router re-syncs the URL back to the
+  // requested params during initial reconciliation, overwriting a single
+  // mount-time replace. We therefore retry a few times until the clean URL
+  // sticks (the guard stops the loop as soon as the query is gone).
   useEffect(() => {
     if (!window.location.search) return;
-    const id = requestAnimationFrame(() =>
-      router.replace(window.location.pathname, { scroll: false }),
-    );
-    return () => cancelAnimationFrame(id);
+    let tries = 0;
+    let id = 0;
+    const attempt = () => {
+      if (!window.location.search) return;
+      router.replace(window.location.pathname, { scroll: false });
+      if (++tries < 12) id = window.setTimeout(attempt, 150);
+    };
+    id = window.setTimeout(attempt, 0);
+    return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
