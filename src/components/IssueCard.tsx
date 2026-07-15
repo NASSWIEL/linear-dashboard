@@ -61,6 +61,22 @@ export function IssueCard({ issue }: { issue: Issue }) {
         busy ? "opacity-60" : ""
       }`}
     >
+      {issue.parent && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            editIssue(issue.parent!.id);
+          }}
+          title={`Ouvrir la tâche parente ${issue.parent.identifier}`}
+          className="mb-1.5 flex w-full items-center gap-1 truncate text-left text-[11px] text-muted hover:text-sky-700 dark:hover:text-sky-300"
+        >
+          <span className="shrink-0 opacity-70">Sous-tâche de</span>
+          <span className="font-mono shrink-0">{issue.parent.identifier}</span>
+          <span className="truncate opacity-90">· {issue.parent.title}</span>
+        </button>
+      )}
+
       <div className="flex items-center justify-between gap-2">
         <span className="font-mono text-xs text-muted">{issue.identifier}</span>
         {issue.priorityLabel && issue.priorityLabel !== "No priority" && (

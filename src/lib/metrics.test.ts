@@ -35,6 +35,7 @@ function mk(overrides: Partial<Issue> & { identifier: string }): Issue {
     assignee: null,
     project: null,
     labels: [],
+    parent: null,
     ...overrides,
   };
 }

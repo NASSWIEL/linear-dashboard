@@ -111,6 +111,7 @@ function issue(partial: Partial<Issue> & Pick<Issue, "identifier" | "title" | "s
     project: null,
     team: T_REC,
     labels: [],
+    parent: null,
     ...partial,
   };
 }
@@ -143,6 +144,11 @@ export function fixtureIssues(): Issue[] {
       project: P_RAG,
       labels: [{ name: "testing", color: "#4cb782" }],
       updatedAt: hoursAgo(5),
+      parent: {
+        id: "REC-101",
+        identifier: "REC-101",
+        title: "Fix PDF loader timeout on large documents",
+      },
     }),
     issue({
       identifier: "REC-103",

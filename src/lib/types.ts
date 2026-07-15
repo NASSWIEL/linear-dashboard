@@ -41,6 +41,14 @@ export interface IssueLabel {
   color: string;
 }
 
+// Lightweight parent reference so a sub-issue card can show which issue it
+// belongs to (Linear's issue.parent). Null for top-level issues.
+export interface IssueParent {
+  id: string;
+  identifier: string;
+  title: string;
+}
+
 export interface Issue {
   id: string;
   identifier: string;
@@ -58,6 +66,7 @@ export interface Issue {
   project: IssueProject | null;
   team?: IssueTeam | null;
   labels: IssueLabel[];
+  parent: IssueParent | null;
 }
 
 export interface Project {

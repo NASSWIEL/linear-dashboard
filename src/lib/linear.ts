@@ -100,6 +100,11 @@ const ISSUES_QUERY = /* GraphQL */ `
           key
           name
         }
+        parent {
+          id
+          identifier
+          title
+        }
         labels {
           nodes {
             name
@@ -223,6 +228,7 @@ const ISSUE_FIELDS = /* GraphQL */ `
   assignee { id name displayName avatarUrl }
   project { id name }
   team { id key name }
+  parent { id identifier title }
   labels { nodes { name color } }
 `;
 

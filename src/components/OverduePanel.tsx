@@ -1,7 +1,9 @@
 import type { Issue } from "@/lib/types";
 import { dueInfo } from "@/lib/format";
+import { useDashboard } from "./DashboardContext";
 
 export function OverduePanel({ issues }: { issues: Issue[] }) {
+  const { editIssue } = useDashboard();
   const sorted = [...issues].sort((a, b) =>
     (a.dueDate ?? "").localeCompare(b.dueDate ?? ""),
   );
@@ -31,7 +33,12 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
             const due = dueInfo(issue.dueDate);
             return (
               <li key={issue.id}>
-                <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <button
+                  type="button"
+                  onClick={() => editIssue(issue.id)}
+                  title="Ouvrir la fiche de la tâche"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left transition-colors hover:bg-surface focus:bg-surface focus:outline-none"
+                >
                   <div className="min-w-0">
                     <p className="truncate text-sm text-fg">
                       {issue.title}
@@ -43,7 +50,7 @@ export function OverduePanel({ issues }: { issues: Issue[] }) {
                   <span className="shrink-0 text-xs font-medium text-red-700 dark:text-red-400">
                     {due?.text}
                   </span>
-                </div>
+                </button>
               </li>
             );
           })}
