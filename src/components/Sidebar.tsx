@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import type { Project, Team, User } from "@/lib/types";
-import { initials, userColor, LIGHT_TOKENS, TEAM_CARD_COLORS } from "@/lib/format";
+import {
+  initials,
+  userColor,
+  userRowColor,
+  LIGHT_TOKENS,
+  TEAM_CARD_COLORS,
+} from "@/lib/format";
 
 export function Sidebar({
   teams,
@@ -158,6 +164,7 @@ export function Sidebar({
             label={m.displayName}
             avatarUrl={m.avatarUrl}
             color={userColor(m.id)}
+            rowColor={userRowColor(m.id)}
             count={countByAssignee(m.id)}
           />
         ))}
@@ -272,6 +279,7 @@ function PersonItem({
   label,
   avatarUrl,
   color,
+  rowColor,
   count,
 }: {
   active: boolean;
@@ -280,6 +288,7 @@ function PersonItem({
   label: string;
   avatarUrl?: string | null;
   color?: string;
+  rowColor?: string;
   count: number;
 }) {
   return (
@@ -287,10 +296,13 @@ function PersonItem({
       type="button"
       aria-label={`Filtrer par ${label}`}
       onClick={onClick}
+      style={rowColor ? { backgroundColor: rowColor, ...LIGHT_TOKENS } : undefined}
       className={`mt-0.5 flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-left text-sm transition-colors ${
-        active
-          ? "bg-elevated text-fg"
-          : "text-muted hover:bg-surface hover:text-fg"
+        rowColor
+          ? `text-fg ring-inset ${active ? "ring-2 ring-sky-500/70" : "ring-1 ring-black/10 hover:ring-black/20"}`
+          : active
+            ? "bg-elevated text-fg"
+            : "text-muted hover:bg-surface hover:text-fg"
       }`}
     >
       <span className="flex min-w-0 items-center gap-2">

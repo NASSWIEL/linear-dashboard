@@ -88,6 +88,14 @@ export function userColor(key: string): string {
   return USER_COLORS[h % USER_COLORS.length];
 }
 
+// Light tint of a user's color for the full sidebar row background, matching
+// the pastel weight of the team/project rows (TEAM_CARD_COLORS). The row uses
+// LIGHT_TOKENS so text stays dark/readable on the tint regardless of theme; the
+// avatar swatch keeps the full-strength userColor.
+export function userRowColor(key: string): string {
+  return `color-mix(in srgb, ${userColor(key)} 16%, white)`;
+}
+
 // Linear's default palette paints Backlog / Todo / Canceled / Duplicate in
 // near-identical grays, so they're indistinguishable on the board and in the
 // dropdown. Override with a distinct, intuitive hue per lifecycle stage, matched
